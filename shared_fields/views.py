@@ -79,10 +79,10 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
 
     page_index = 1
     item_count = 15
-    sort_col = None
-    sort_type = None
+    sort_col = ''
+    sort_type = ''
     search_col = ''
-    search_value = None
+    search_value = ''
     if request.GET:
         if 'page' in request.GET:
             page_index = int(request.GET['page'])

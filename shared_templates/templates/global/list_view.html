@@ -168,6 +168,9 @@
 
     function trigger_form(item, value){
         $("#main_form #" + item + "_input").val(value);
+        if(item == 'sort_col'){
+            $("#main_form #sort_type_input").val('asc');
+        }
         $("#main_form").submit();
     }
 
