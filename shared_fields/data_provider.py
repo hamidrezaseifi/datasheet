@@ -204,6 +204,8 @@ class DataProviderBase(ABC):
         try:
             total = self._get_session().query(self.get_data_model()).count()
             page_count = int(total / item_count)
+            if page > page_count:
+                page = page_count
             if page_count * item_count < total:
                 page_count += 1
 
@@ -268,75 +270,6 @@ class DataProviderBase(ABC):
 
     def get_nav_provider(self) -> ModelNavigationProvider:
         return self._nav_provider
-
-    # alt-ok
-    # def get_urls1(self, form_data, view_create_func, view_list_func, view_delete_func, view_success_func,
-    #              data_provider_map) -> List:
-    #     print(f"get urls from {self.get_model_title()}", data_provider_map)
-    #     return [
-    #         path('data/', view_create_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': self.get_base_url(),
-    #               'form_class': form_data}),
-    #         path('delete', view_delete_func, {'data_provider': self}),
-    #         path('list/', view_list_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': self.get_base_url()}),
-    #         path('data/<str:primary_key_base64>/', view_create_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': self.get_base_url(),
-    #               'form_class': form_data}),
-    #         path('success', view_success_func,
-    #              {'model_name': self.get_model_title(), 'data_providers': data_provider_map,
-    #               'base_url': self.get_base_url()}),
-    #     ]
-
-    # def get_urls(self, form_data, view_create_func, view_list_func, view_delete_func, view_success_func,
-    #              data_provider_map, base_url=None) -> List:
-    #     model_title = self.get_model_title()
-    #     print(f"get urls from {model_title}", data_provider_map)
-    #     url_prefix = base_url if base_url is not None else self.get_base_url()
-    #     url_prefix = url_prefix.strip('/') + '/' if url_prefix else ''  # Normalize
-    #     print(f"{self.get_model_title()} -> Using url_prefix: {url_prefix} end")
-    #     return [
-    #         path(f'{url_prefix}data/',
-    #              view_create_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': url_prefix,
-    #               'form_class': form_data}, name=f'{model_title}_create'),
-    #         path(f'{url_prefix}delete/',
-    #              view_delete_func,
-    #              {'data_provider': self, 'base_url': url_prefix}, name=f'{model_title}_delete'),
-    #         path(f'{url_prefix}list/',
-    #              view_list_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': url_prefix},
-    #              name=f'{model_title}_list'),
-    #         path(f'{url_prefix}data/<str:primary_key>/',
-    #              view_create_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': url_prefix,
-    #               'form_class': form_data},
-    #              name=f'{model_title}_edit'),
-    #         path(f'{url_prefix}success/',
-    #              view_create_func,
-    #              {'model_name': model_title, 'data_providers': data_provider_map, 'base_url': url_prefix},
-    #              name=f'{model_title}_success'),
-    #     ]
-    # neu
-    # def get_urls(self, form_data, view_create_func, view_list_func, view_delete_func, view_success_func,
-    #              data_provider_map) -> List:
-    #     print(f"Get URLs from {self.get_model_title()}", data_provider_map)
-    #     # Erstelle ein URL-Muster für mehrere Primärschlüssel
-    #     pk_pattern = "/".join([f"<str:pk_{pk}>" for pk in self._primary_key_list])
-    #     return [
-    #         path('data/', view_create_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': self.get_base_url(),
-    #               'form_class': form_data}),
-    #         path('delete', view_delete_func, {'data_provider': self}),
-    #         path('list/', view_list_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': self.get_base_url()}),
-    #         path(f'data/{pk_pattern}/', view_create_func,
-    #              {'data_provider': self, 'data_providers': data_provider_map, 'base_url': self.get_base_url(),
-    #               'form_class': form_data}),
-    #         path('success', view_success_func,
-    #              {'model_name': self.get_model_title(), 'data_providers': data_provider_map,
-    #               'base_url': self.get_base_url()}),
-    #     ]
 
     def get_primary_key(self) -> List[str]:
         return self._primary_key_list

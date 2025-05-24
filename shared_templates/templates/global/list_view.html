@@ -25,10 +25,10 @@
             <label for="pageSize" class="col-form-label">Page Size</label>
           </div>
           <div class="col-auto">
-            <select id="pageSize" onchange="window.location.href='?count=' + this.value;" class="form-select form-control" aria-label="Default select example">
+            <select id="pageSize" onchange="trigger_form('count', this.value);" class="form-select form-control" aria-label="">
               <option {% if item_count == 15 %} selected {% endif %} value="15">15</option>
               <option {% if item_count == 25 %} selected {% endif %} value="25">25</option>
-              <option {% if item_count == 500 %} selected {% endif %} value="50">50</option>
+              <option {% if item_count == 50 %} selected {% endif %} value="50">50</option>
               <option {% if item_count == 100 %} selected {% endif %} value="100">100</option>
             </select>
 
@@ -43,7 +43,7 @@
         </li>
           {% for page_idx in page_list %}
 
-        <li class="page-item{% if page_idx == page_index %} active{% endif %}"><a class="page-link" href="?count={{item_count}}&page={{page_idx}}{% if sort_col %}&sort_col={{sort_col}}{% endif %}{% if sort_type %}&sort_type={{sort_type}}{% endif %}">{{page_idx}}</a></li>
+        <li class="page-item{% if page_idx == page_index %} active{% endif %}"><a class="page-link" onclick="trigger_form('page', {{page_idx}});" style="cursor: pointer">{{page_idx}}</a></li>
 
            {% endfor %}
         <li class="page-item disabled">
@@ -53,6 +53,30 @@
 
       </ul>
     </nav>
+
+    <div style="float: right; width: 350px;">
+        <form class="d-flex" id="main_form" role="search" method="GET">
+            <select class="form-select" name="search_col" id="search_col_select" onchange="enableSearch()">
+              <option value="" {% if search_col == None or search_col == '' %} selected {% endif %}>{{column}}</option>
+              {% for column in columns %}
+              <option value="{{column}}" {% if search_col == column %} selected {% endif %}>{{column}}</option>
+              {% endfor %}
+            </select>
+
+            <input class="form-control me-2" type="search" onchange="enableSearch()" onkeypress="enableSearch()" name="search_value" id="search_value_input" value="{{search_value}}" placeholder="Suche ..." aria-label="Search"/>
+
+            <input type="hidden" name="count" id="count_input" value="{{item_count}}">
+
+            <input type="hidden" name="page" id="page_input" value="{{page_index}}">
+
+            <input type="hidden" name="sort_col" id="sort_col_input" value="{{sort_col}}">
+
+            <input type="hidden" name="sort_type" id="sort_type_input" value="{{sort_type}}">
+
+            <button class="btn btn-success" type="submit" title="Suchen" id="search_button" disabled> <i class="bi bi-funnel" style="cursor: pointer"></i></button>
+            <button class="btn btn-primary" type="button" title="Suche löschen" onclick="this.form.search_value.value='';this.form.search_col.selectedIndex=0;this.form.submit();"> <i class="bi bi-x-circle" style="cursor: pointer"></i></button>
+        </form>
+    </div>
 </div>
 
 <table class="table data-table" id="data-table">
@@ -64,17 +88,17 @@
             <span style="display: inline-block">{{ column }}</span>
             {% endif %}
             {% if sort_col != column %}
-            <span style="display: inline-block"><a href="?count={{item_count}}&page={{page_index}}&sort_col={{ column }}&sort_type=asc">{{ column }}</a></span>
+            <span style="display: inline-block"><a onclick="trigger_form('sort_col', '{{column}}');" style="cursor: pointer;">{{ column }}</a></span>
             {% endif %}
 
             <span class="column-detail-part">
-                <i class="bi bi-funnel"></i>
+
                 {% if sort_col == column %}
                 {% if sort_type == 'asc' %}
-                <a href="?count={{item_count}}&page={{page_index}}&sort_col={{ column }}&sort_type=desc"><i class="bi bi-arrow-up"></i></a>
+                <a onclick="trigger_form('sort_type', 'desc');" style="cursor: pointer;"><i class="bi bi-arrow-down"></i></a>
                 {% endif %}
                 {% if sort_type == 'desc' %}
-                <a href="?count={{item_count}}&page={{page_index}}&sort_col={{ column }}&sort_type=asc"><i class="bi bi-arrow-down"></i></a>
+                <a onclick="trigger_form('sort_type', 'asc');" style="cursor: pointer;"><i class="bi bi-arrow-up"></i></a>
                 {% endif %}
                 {% endif %}
 
@@ -134,7 +158,18 @@
 </div>
 
 <script>
+    function enableSearch(){
+        $("#search_button").prop('disabled', true);
+        if($("#search_col_select").val() != '' && $("#search_value_input").val() != ''){
+            $("#search_button").prop('disabled', false);
+        }
 
+    }
+
+    function trigger_form(item, value){
+        $("#main_form #" + item + "_input").val(value);
+        $("#main_form").submit();
+    }
 </script>
 
 {% endblock %}
