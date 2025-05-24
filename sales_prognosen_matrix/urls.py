@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from meinprojekt.urls import DATA_PROVIDER_MAP
+from meinprojekt.urls import MENU_MAP
 from sales_prognosen_matrix.forms import SalesObjektForm, SalesPrognoseForm
 from sales_prognosen_matrix.models_sqlalchemy import SALES_PROGNOSE_DATA_PROVIDER, SALES_OBJEKT_DATA_PROVIDER
 from shared_fields.views import generic_crud_view, generic_list_view, generic_delete_view, success_view
@@ -14,7 +14,7 @@ urlpatterns = SALES_PROGNOSE_DATA_PROVIDER.get_nav_provider().get_urls(SalesObje
                                                                        generic_list_view,
                                                                        generic_delete_view,
                                                                        success_view,
-                                                                       DATA_PROVIDER_MAP)
+                                                                       MENU_MAP)
 
 
 

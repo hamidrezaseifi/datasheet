@@ -26,7 +26,7 @@ class EingabeDataProvider(DataProviderBase):
                          'public',
                          'eingabe',
                          ['email'],
-                         ModelNavigationProvider("Eingabe", "eingabe", self))
+                         ModelNavigationProvider("Eingabe", "eingabe", "Meine Test", self))
         metadata = MetaData()
 
         self._table = Table(self._table_name, metadata,

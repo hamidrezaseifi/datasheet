@@ -32,7 +32,7 @@ class PlanungDataProvider(DataProviderBase, ABC):
                          'public',
                          'planung',
                          ['sap_nr', 'id2'],
-                         ModelNavigationProvider("Planung", "planung", self))
+                         ModelNavigationProvider("Planung", "planung", "Meine Test", self))
         metadata = MetaData()
 
         self._table = Table(self._table_name, metadata,

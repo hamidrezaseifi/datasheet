@@ -1,12 +1,10 @@
-from django.core.exceptions import BadRequest
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
-from django.urls import reverse
 
 from shared_fields.data_provider import DataProviderBase
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 
 
-def generic_crud_view(request, data_provider: DataProviderBase, form_class, base_url, data_providers, primary_key_base64=None):
+def generic_crud_view(request, data_provider: DataProviderBase, form_class, base_url, menu_map, primary_key_base64=None):
 
     instance = None
     django_instance = None
@@ -46,7 +44,7 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
 
     return render(request, 'global/form_view.html',
                   {
-                      'data_providers': data_providers,
+                      'menu_map': menu_map,
                       'base_url': base_url,
                       'form': form,
                       'instance': instance,
@@ -74,7 +72,7 @@ def generic_delete_view(request, data_provider: DataProviderBase):
     return JsonResponse(data)
 
 
-def generic_list_view(request, data_provider: DataProviderBase, base_url, data_providers):
+def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_map):
 
     max_page_index = 6
 
@@ -92,8 +90,20 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, data_p
 
     page_index_list = _generate_page_index_list(max_page_index, page_count, page_index)
 
+    print(f"menu_map : {menu_map}")
+
+    selected_parent = None
+    for par in menu_map:
+        for proj in menu_map[par]:
+            url = request.path
+            if url.endswith("/"):
+                url = url[:len(url) - 1]
+            if url in menu_map[par][proj]:
+                selected_parent = par
+                break
+
     return render(request, 'global/list_view.html',
-                  {'data_providers': data_providers,
+                  {'menu_map': menu_map,
                    'total': total,
                    'page_count': page_count,
                    'page_list': page_index_list,
@@ -103,7 +113,8 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, data_p
                    'columns': columns,
                    'model_name': data_provider.get_nav_provider().get_model_title(),
                    'base_url': base_url,
-                   'pk_columns': pk_columns
+                   'pk_columns': pk_columns,
+                   "selected_parent": selected_parent
                    }
                   )
 
@@ -120,10 +131,10 @@ def _generate_page_index_list(max_page_index, page_count, page_index):
     return page_index_list
 
 
-def generic_static_view(request, static_html, data_providers, arguments):
+def generic_static_view(request, static_html, menu_map, arguments):
     print("start generic_static_view for ", static_html)
-    return render(request, static_html, {'data_providers': data_providers, 'data': arguments})
+    return render(request, static_html, {'menu_map': menu_map, 'data': arguments})
 
 
-def success_view(request, model_name, base_url, data_providers):
-    return render(request, 'global/success.html', {'data_providers': data_providers, 'base_url': base_url, 'model_name': model_name})
+def success_view(request, model_name, base_url, menu_map):
+    return render(request, 'global/success.html', {'menu_map': menu_map, 'base_url': base_url, 'model_name': model_name})

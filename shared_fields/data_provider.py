@@ -6,10 +6,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, List
 
-from django.urls import path
 from sqlalchemy import Table, text
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from shared_fields.model_navigation_provider import ModelNavigationProvider
 
 
 class DatabaseConfig:
@@ -50,44 +51,6 @@ class DatabaseConfig:
         if self._url_additional and len(self._url_additional) > 0:
             additional = f'?{self._url_additional}'
         return f"{self._database_type}://{self._user}:{self._password}@{_server}/{self._database}{additional}"
-
-
-class ModelNavigationProvider:
-    _model_title: str = ''
-    _base_url: str = ''
-    _data_provider: None
-
-    def __init__(self, model_title: str, base_url: str, data_provider):
-        self._model_title = model_title
-        self._base_url = base_url
-        self._data_provider = data_provider
-
-    def get_urls(self, form_data, view_create_func, view_list_func, view_delete_func, view_success_func,
-                 data_provider_map) -> List:
-        print(f"get urls from {self._model_title}", data_provider_map)
-        return [
-            path('data/', view_create_func,
-                 {'data_provider': self._data_provider, 'data_providers': data_provider_map, 'base_url': self._base_url,
-                  'form_class': form_data}),
-            path('delete', view_delete_func, {'data_provider': self._data_provider}),
-            path('list/', view_list_func,
-                 {'data_provider': self._data_provider, 'data_providers': data_provider_map, 'base_url': self._base_url}),
-            path('data/<str:primary_key_base64>/', view_create_func,
-                 {'data_provider': self._data_provider, 'data_providers': data_provider_map, 'base_url': self._base_url,
-                  'form_class': form_data}),
-            path('success', view_success_func,
-                 {'model_name': self._model_title, 'data_providers': data_provider_map,
-                  'base_url': self._base_url}),
-        ]
-
-    def get_model_title(self):
-        return self._model_title
-
-    def get_base_url(self):
-        return self._base_url
-
-    def get_data_provider(self):
-        return self._data_provider
 
 
 class DataProviderBase(ABC):
