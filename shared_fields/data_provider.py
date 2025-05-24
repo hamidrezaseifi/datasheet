@@ -208,9 +208,7 @@ class DataProviderBase(ABC):
 
         try:
 
-            qr = self._get_session().query(self.get_data_model())
-            if search_col and len(search_col) > 0 and search_value and len(search_value) > 0:
-                qr = qr.filter(getattr(self.get_data_model(), search_col).like("%{}%".format(search_value)))
+            qr = self._get_filter_query(search_col, search_value)
 
             total = qr.count()
 
@@ -220,9 +218,7 @@ class DataProviderBase(ABC):
             if page > page_count:
                 page = page_count
 
-            qr = self._get_session().query(self.get_data_model())
-            if search_col and len(search_col) > 0 and search_value and len(search_value) > 0:
-                qr = qr.filter(getattr(self.get_data_model(), search_col).like("%{}%".format(search_value)))
+            qr = self._get_filter_query(search_col, search_value)
 
             if sort_col:
                 if sort_type is None:
@@ -259,6 +255,12 @@ class DataProviderBase(ABC):
             raise
         finally:
             self._close_session()
+
+    def _get_filter_query(self, search_col, search_value):
+        qr = self._get_session().query(self.get_data_model())
+        if search_col and len(search_col) > 0 and search_value and len(search_value) > 0:
+            qr = qr.filter(getattr(self.get_data_model(), search_col).like("%{}%".format(search_value)))
+        return qr
 
     def convert_dic_to_base64(self, dict_item):
         pk_as_str = json.dumps(dict_item)
