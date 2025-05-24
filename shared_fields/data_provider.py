@@ -199,17 +199,31 @@ class DataProviderBase(ABC):
     def get_columns(self) -> List[str]:
         return self._columns
 
-    def get_items(self, item_count: int = 15, page: int = 0, sort_col: str = None, sort_type: str = None) -> [int, int, List[object]]:
+    def get_items(self, item_count: int = 15,
+                  page: int = 0,
+                  sort_col: str = None,
+                  sort_type: str = None,
+                  search_col: str = None,
+                  search_value: str = None) -> [int, int, List[object]]:
 
         try:
-            total = self._get_session().query(self.get_data_model()).count()
-            page_count = int(total / item_count)
-            if page > page_count:
-                page = page_count
-            if page_count * item_count < total:
-                page_count += 1
 
             qr = self._get_session().query(self.get_data_model())
+            if search_col and len(search_col) > 0 and search_value and len(search_value) > 0:
+                qr = qr.filter(getattr(self.get_data_model(), search_col).like("%{}%".format(search_value)))
+
+            total = qr.count()
+
+            page_count = int(total / item_count)
+            if page_count * item_count < total:
+                page_count += 1
+            if page > page_count:
+                page = page_count
+
+            qr = self._get_session().query(self.get_data_model())
+            if search_col and len(search_col) > 0 and search_value and len(search_value) > 0:
+                qr = qr.filter(getattr(self.get_data_model(), search_col).like("%{}%".format(search_value)))
+
             if sort_col:
                 if sort_type is None:
                     sort_type = "asc"

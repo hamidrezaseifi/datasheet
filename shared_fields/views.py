@@ -101,14 +101,14 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
     total, page_count, data_items = data_provider.get_items(item_count=item_count,
                                                             page=page_index,
                                                             sort_col=sort_col,
-                                                            sort_type=sort_type)
+                                                            sort_type=sort_type,
+                                                            search_col=search_col,
+                                                            search_value=search_value)
     if page_index > page_count:
         page_index = page_count
     pk_columns = data_provider.get_primary_key()
 
     page_index_list = _generate_page_index_list(max_page_index, page_count, page_index)
-
-    print(f"menu_map : {menu_map}")
 
     selected_parent = get_selected_parent(menu_map, request)
 
