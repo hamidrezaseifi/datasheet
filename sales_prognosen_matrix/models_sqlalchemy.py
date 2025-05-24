@@ -1,13 +1,14 @@
 # sales_prognosen_matrix/models_sqlalchemy.py
+from abc import ABC
+from datetime import datetime
+
 from sqlalchemy import Column, BigInteger, Integer, String, Float, Date, ForeignKey, MetaData, Table, \
     PrimaryKeyConstraint, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import relationship
 
 from sales_prognosen_matrix.forms import get_month_name
 from shared_fields.data_provider import DataProviderBase, DatabaseConfig, ModelNavigationProvider
-from abc import ABC
-from datetime import date, datetime
 
 Base = declarative_base()
 

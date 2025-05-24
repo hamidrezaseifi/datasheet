@@ -1,5 +1,3 @@
-from django.urls import path
-
 from meinprojekt.urls import MENU_MAP
 from planung.forms import PlanungForm
 from planung.models_sqlalchemy import PLANUNG_DATA_PROVIDER

@@ -1,8 +1,4 @@
 # shared_fields/fields.py
-from django import forms
-from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
-from django.utils.translation import gettext_lazy as _
-from django.db import models
 
 # only_letters_validator = RegexValidator(
 #     regex=r'^[a-zA-ZäöüÄÖÜß\s-]+$',
