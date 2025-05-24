@@ -1,0 +1,14 @@
+{% extends 'global/base.html' %}
+
+{% block title %}erfolgreich gespeichert{% endblock %}
+
+{% block content %}
+<div class="alert alert-success" role="alert">
+    <h1>{{model_name}} erfolgreich gespeichert</h1>
+    <p>die daten wurden erfolgreich in die datenbank eingefügt.</p>
+</div>
+<a href="/" class="btn btn-secondary">zur startseite</a>
+<a href="/{{base_url}}/data" class="btn btn-secondary">neue {{model_name}}</a>
+<a href="/{{base_url}}/list" class="btn btn-secondary">zur {{model_name}}-Liste</a>
+
+{% endblock %}

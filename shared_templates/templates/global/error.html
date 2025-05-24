@@ -1,0 +1,11 @@
+{% extends 'global/base.html' %}
+
+{% block title %}fehler{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger" role="alert">
+    <h1>fehler</h1>
+    <p>{{ message|default:"ein fehler ist aufgetreten. bitte versuche es erneut."|lower }}</p>
+</div>
+<a href="/{{base_url}}/data" class="btn btn-secondary">zurück zum formular</a>
+{% endblock %}
