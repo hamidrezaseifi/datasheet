@@ -79,14 +79,23 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
 
     page_index = 1
     item_count = 15
+    sort_col = None
+    sort_type = None
     if request.GET:
         if 'page' in request.GET:
             page_index = int(request.GET['page'])
         if 'count' in request.GET:
             item_count = int(request.GET['count'])
+        if 'sort_col' in request.GET:
+            sort_col = request.GET['sort_col']
+        if 'sort_type' in request.GET:
+            sort_type = request.GET['sort_type']
 
     columns = data_provider.get_columns()
-    total, page_count, data_items = data_provider.get_items(item_count=item_count, page=page_index)
+    total, page_count, data_items = data_provider.get_items(item_count=item_count,
+                                                            page=page_index,
+                                                            sort_col=sort_col,
+                                                            sort_type=sort_type)
     pk_columns = data_provider.get_primary_key()
 
     page_index_list = _generate_page_index_list(max_page_index, page_count, page_index)
@@ -107,7 +116,9 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
                    'model_name': data_provider.get_nav_provider().get_model_title(),
                    'base_url': base_url,
                    'pk_columns': pk_columns,
-                   "selected_parent": selected_parent
+                   "selected_parent": selected_parent,
+                   "sort_col": sort_col,
+                   "sort_type": sort_type
                    }
                   )
 

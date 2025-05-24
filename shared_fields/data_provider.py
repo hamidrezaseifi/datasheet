@@ -199,7 +199,7 @@ class DataProviderBase(ABC):
     def get_columns(self) -> List[str]:
         return self._columns
 
-    def get_items(self, item_count: int = 15, page: int = 0, sort: str = None) -> [int, int, List[object]]:
+    def get_items(self, item_count: int = 15, page: int = 0, sort_col: str = None, sort_type: str = None) -> [int, int, List[object]]:
 
         try:
             total = self._get_session().query(self.get_data_model()).count()
@@ -208,12 +208,14 @@ class DataProviderBase(ABC):
                 page_count += 1
 
             qr = self._get_session().query(self.get_data_model())
+            if sort_col:
+                if sort_type is None:
+                    sort_type = "asc"
+                qr = qr.order_by(text(sort_col + " " + sort_type))
             if item_count:
                 qr = qr.limit(item_count)
             if page:
                 qr = qr.offset(item_count * (page - 1))
-            if sort:
-                qr = qr.order_by(text(sort))
 
             items = qr.all()
 
