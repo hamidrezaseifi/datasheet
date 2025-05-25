@@ -50,11 +50,5 @@ class EingabeDataProvider(DataProviderBase):
     def _prepare_items_internal(self, data_item):
         return data_item
 
-    def get_model_title1(self) -> str:
-        return "Eingabe"
-
-    def get_base_url1(self) -> str:
-        return "eingabe"
-
 
 EINGABE_DATA_PROVIDER = EingabeDataProvider()

@@ -82,7 +82,6 @@ class DataProviderBase(ABC):
         self._engine = create_engine(self._db_config.get_url(), echo=True, future=True)
         self._session_maker = sessionmaker(autocommit=False, autoflush=False, bind=self._engine)
 
-
     def _create_table(self) -> [Table, Dict]:
         if self._table_created:
             return
@@ -199,7 +198,8 @@ class DataProviderBase(ABC):
     def get_columns(self) -> List[str]:
         return self._columns
 
-    def get_items(self, item_count: int = 15,
+    def get_items(self,
+                  item_count: int = 15,
                   page: int = 0,
                   sort_col: str = None,
                   sort_type: str = None,
@@ -256,6 +256,7 @@ class DataProviderBase(ABC):
         finally:
             self._close_session()
 
+    ## TODO Search the columns based on column-type? Search in Palnung -> Jahr: 2017
     def _get_filter_query(self, search_col, search_value):
         qr = self._get_session().query(self.get_data_model())
         if search_col and len(search_col) > 0 and search_value and len(search_value) > 0:

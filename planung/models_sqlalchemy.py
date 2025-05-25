@@ -67,12 +67,6 @@ class PlanungDataProvider(DataProviderBase, ABC):
         data_item['monat'] = get_month_name(data_item['monat'])
         return data_item
 
-    def get_model_title1(self) -> str:
-        return "Planung"
-
-    def get_base_url1(self) -> str:
-        return "planung"
-
 
 PLANUNG_DATA_PROVIDER = PlanungDataProvider()
 

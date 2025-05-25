@@ -133,14 +133,12 @@
   </tbody>
 </table>
 
-<div class="modal" id="deleteModel" tabindex="-1" role="dialog">
+<div class="modal fade" id="deleteModel" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog  modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Löschen ...</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="deleteModelBody">
         ...
@@ -173,6 +171,56 @@
         }
         $("#main_form").submit();
     }
+
+
+
+    function getCookie(name) {
+		 var cookieValue = null;
+		 if (document.cookie && document.cookie != '') {
+			 var cookies = document.cookie.split(';');
+			 for (var i = 0; i < cookies.length; i++) {
+				 var cookie = jQuery.trim(cookies[i]);
+				  //Does this cookie string begin with the name we want?
+				 if (cookie.substring(0, name.length + 1) == (name + '=')) {
+					 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					 break;
+				 }
+			 }
+		 }
+		 return cookieValue;
+	 }
+
+    function deleteItem(deleteUrl, pk, itemName){
+
+        $("#idToDelete").val(pk);
+        $("#urlToDelete").val(deleteUrl);
+
+        $("#deleteModelBody").text("Möchten Sie diesen Artikel (" + itemName + ") wirklich löschen?");
+        $("#deleteModel").modal('show');
+    }
+
+    function doDeleteItem(){
+
+        var pk = $("#idToDelete").val();
+        var deleteUrl = $("#urlToDelete").val();
+        var itemName = $("#nameToDelete").val();
+
+        $.post(deleteUrl, {key: pk, csrfmiddlewaretoken: getCookie('csrftoken')},
+        function(data, status){
+
+            location.replace(location.pathname);
+        }).fail(function(data) {
+        alert("Error in in delete: " + JSON.stringify(data.responseText));
+      })
+    }
+
+
+    function closeDeleteModal(){
+
+        $("#deleteModel").modal("hide");
+
+    }
+
 
     enableSearch();
 </script>
