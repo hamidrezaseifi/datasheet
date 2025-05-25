@@ -34,7 +34,7 @@ class SalesObjektProvider(DataProviderBase, ABC):
                          'public',
                          'sales_objekt',
                          ['objekt'],
-                         ModelNavigationProvider("Sales-Objekt", "sales_objekt", "Sales", self))
+                         ModelNavigationProvider("Objekte", "sales/objekte", "Sales", self))
         metadata = MetaData()
 
         self._table = Table(self._table_name, metadata,
@@ -90,7 +90,7 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
                          'public',
                          'sales_prognose',
                          ['id'],
-                         ModelNavigationProvider("Sales-Prognose", "sales_prognose", "Sales", self))
+                         ModelNavigationProvider("Prognose", "sales/prognose", "Sales", self))
         metadata = MetaData()
 
         self._table = Table(self._table_name, metadata,
