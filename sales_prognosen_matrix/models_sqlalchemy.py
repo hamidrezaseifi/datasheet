@@ -1,23 +1,23 @@
 # sales_prognosen_matrix/models_sqlalchemy.py
 from abc import ABC
 from datetime import datetime, date
+from typing import Dict
 
 from sqlalchemy import Column, BigInteger, Integer, String, Float, Date, ForeignKey, MetaData, Table, \
     PrimaryKeyConstraint, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, mapper
+from sqlalchemy.orm import relationship
 
 from sales_prognosen_matrix.forms import get_month_name
 from shared_fields.data_provider import DataProviderBase, DatabaseConfig, ModelNavigationProvider
-from shared_fields.model_navigation_provider import DummyModelNavigationProvider
 
 Base = declarative_base()
 
 
 class ZvmObjekte(Base):
     __tablename__ = 'zvm_objekte'
-    __table_args__ = {'schema': 'ZVM_STAGING.stage'}
-    Kuerzel = Column(String(255), primary_key=True)
+    __table_args__ = {'schema': 'ZVM_STAGING.stage', 'quote': False, 'extend_existing': True}
+    Kuerzel = Column(String(255), nullable=False, primary_key=True, name='Kuerzel', quote=False)
 
 
 class ZvmObjektProvider(DataProviderBase, ABC):
@@ -50,6 +50,9 @@ class ZvmObjektProvider(DataProviderBase, ABC):
     def get_django_instance(self, p_key, instance):
         django_instance = ZvmObjekte(Kuerzel=instance.Kuerzel)
         return django_instance
+
+    def get_edit_extra_data(self) -> Dict[str, object]:
+        return {}
 
 
 ZVM_OBJEKT_DATA_PROVIDER = ZvmObjektProvider()
@@ -107,6 +110,9 @@ class SalesObjektProvider(DataProviderBase, ABC):
     def get_base_url(self) -> str:
         return "sales_objekt"
 
+    def get_edit_extra_data(self) -> Dict[str, object]:
+        return {}
+
 
 SALES_OBJEKT_DATA_PROVIDER = SalesObjektProvider()
 
@@ -159,6 +165,20 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
     def get_data_model(self):
         return SalesPrognose
 
+    def _create_new_instance(self, post_data):
+        instance = self.get_data_model()()
+        for field_name, value in post_data.items():
+            if hasattr(instance, field_name):
+                setattr(instance, field_name, value)
+            else:
+                print(f"not in instance: {field_name}")
+        jahr = instance.jahr
+        monat = instance.monat
+
+        instance.datum = date(int(jahr), int(monat), 1) if jahr and monat else None
+
+        return instance
+
     def get_django_instance(self, p_key, instance):
         jahr = instance.jahr
         monat = instance.mona
@@ -182,6 +202,11 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
 
     def get_base_url(self) -> str:
         return "sales_objekt"
+
+    def get_edit_extra_data(self) -> Dict[str, object]:
+        objects = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
+
+        return {"objects": {r["objekt"]: r["sort_order"] for r in objects}}
 
 
 SALES_PROGNOSE_DATA_PROVIDER = SalesPrognoseProvider()

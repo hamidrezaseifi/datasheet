@@ -63,7 +63,8 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
                       'form': form,
                       'instance': instance,
                       'model_name': data_provider.get_nav_provider().get_model_title(),
-                      "selected_parent": selected_parent
+                      "selected_parent": selected_parent,
+                      "extrac_data": data_provider.get_edit_extra_data()
                   }
                   )
 

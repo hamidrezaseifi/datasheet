@@ -35,12 +35,20 @@
     </a>
 
 </form>
-{% endblock %}
 
-{% block extra_js %}
-{% if select2_fields %}
+
     <script>
+
+{% if model_name == 'Prognose' %}
+        var objects = {};
+        {% for obj, sort in extrac_data.objects.items %}
+        objects['{{obj}}'] = {{sort}};
+        {% endfor %}
+{% endif %}
+
+
       $(document).ready(function() {
+      {% if select2_fields %}
         {% for field, search_url in select2_fields.items %}
           $('#id_{{ field }}').select2({
             placeholder: "{% trans 'Auswählen' %}",
@@ -68,7 +76,19 @@
             }
           });
         {% endfor %}
+    {% endif %}
+
       });
-    </script>
+
+{% if model_name == 'Prognose' %}
+
+       function objekt_changed() {
+            $("#id_sortierreihen_folge").val(objects[$("#id_objekt").val()]);
+
+        }
 {% endif %}
+
+    </script>
+
 {% endblock %}
+

@@ -1,5 +1,6 @@
 # eingabemaske/models_sqlalchemy.py
 from datetime import datetime
+from typing import Dict
 
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy import MetaData, Table, PrimaryKeyConstraint
@@ -49,6 +50,9 @@ class EingabeDataProvider(DataProviderBase):
 
     def _prepare_items_internal(self, data_item):
         return data_item
+
+    def get_edit_extra_data(self) -> Dict[str, object]:
+        return {}
 
 
 EINGABE_DATA_PROVIDER = EingabeDataProvider()

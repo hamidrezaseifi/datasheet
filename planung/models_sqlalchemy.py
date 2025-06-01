@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Dict
 
 from sqlalchemy import Column, BigInteger, String, Integer
 from sqlalchemy import MetaData, Table, PrimaryKeyConstraint
@@ -64,6 +65,9 @@ class PlanungDataProvider(DataProviderBase, ABC):
     def _prepare_items_internal(self, data_item):
         data_item['monat'] = get_month_name(data_item['monat'])
         return data_item
+
+    def get_edit_extra_data(self) -> Dict[str, object]:
+        return {}
 
 
 PLANUNG_DATA_PROVIDER = PlanungDataProvider()

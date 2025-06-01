@@ -247,27 +247,7 @@ class DataProviderBase(ABC):
                 data_item['_dj_pk'] = base64_string
                 data_items.append(data_item)
 
-                # print(f"{self.get_model_title()} -> pk-64: {base64_string}")
-
-                t1 = self.convert_base64_to_dic(base64_string)
-
-                # print(f"{self.get_model_title()} -> pk-dict: {t1}")
-
             return total, page_count, data_items
-            # for item in items:
-            #     attrs = {key: value for key, value in item.__dict__.items() if not key.startswith('_')}
-            #     data_item = {key: attrs[key] for key in self._columns}
-            #     data_item = self._prepare_items_internal(data_item)
-            #     # Include primary key values directly
-            #     pk_data_item = {key: attrs[key] for key in self.get_primary_key()}
-            #     for pk_key, pk_value in pk_data_item.items():
-            #         data_item[pk_key] = pk_value
-            #     # Keep _dj_pk for other use cases
-            #     base64_string = self.convert_dic_to_base64(pk_data_item)
-            #     data_item['_dj_pk'] = base64_string
-            #     data_items.append(data_item)
-            #
-            # return total, page_count, data_items
 
         except Exception as e:
             print(f"Exception in reading items: {e}")
@@ -276,7 +256,7 @@ class DataProviderBase(ABC):
         finally:
             self._close_session()
 
-    def get_all_items(self):
+    def get_all_items(self) -> List:
         try:
             # Sitzung und Modell abrufen
             qr = self._get_session().query(self.get_data_model())
@@ -381,3 +361,7 @@ class DataProviderBase(ABC):
 
     def get_primary_key(self) -> List[str]:
         return self._primary_key_list
+
+    @abstractmethod
+    def get_edit_extra_data(self) -> Dict[str, object]:
+        pass

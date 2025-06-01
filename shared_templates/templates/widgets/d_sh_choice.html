@@ -1,0 +1,43 @@
+
+ <div class="dropdown {{widget.attrs.class}}">
+<input type="hidden"
+          name="{{ widget.name }}" id="id_{{ widget.name }}"
+	  {% if widget.value != None %}
+	    value="{{ widget.value }}"
+	  {% endif %} />
+    <button class="btn btn-primary dropdown-toggle {{widget.attrs.class}}" style="text-align: left" type="button" id="btn_dropdown_{{ widget.name }}" data-toggle="dropdown" onclick="$('#dropdown_{{ widget.name }}').toggle()">
+        --- {{widget.attrs.item_name}} auswählen ---
+    <span class="caret"></span></button>
+    <ul class="dropdown-menu {{widget.attrs.class}}" id="dropdown_{{ widget.name }}">
+      <input class="form-control" id="search_{{ widget.name }}" type="text" placeholder="Search.." onkeyup="filter_{{ widget.name }}();">
+        {% for key,val in widget.attrs.choices %}
+      <li><a href="#" onclick="select_{{ widget.name }}('{{val}}');">{{val}}</a></li>
+        {% endfor %}
+
+    </ul>
+  </div>
+
+
+ <script>
+
+  function select_{{ widget.name }}(data) {
+    $('#dropdown_{{ widget.name }}').toggle();
+    $('#btn_dropdown_{{ widget.name }}').text(data);
+    $('#id_{{ widget.name }}').val(data);
+
+     {% if widget.attrs.on_change %}
+     {{widget.attrs.on_change}}
+     {% endif %}
+
+  }
+
+  function filter_{{ widget.name }}() {
+    var value = $("#search_{{ widget.name }}").val().toLowerCase();
+
+    $("#dropdown_{{ widget.name }}.dropdown-menu li").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+
+  }
+
+</script>
