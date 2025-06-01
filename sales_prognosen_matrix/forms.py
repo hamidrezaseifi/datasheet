@@ -1,10 +1,13 @@
 # sales_prognosen_matrix/forms.py
+from select import select
+
 from django import forms
+from django_select2.forms import Select2Widget
 from django.core.validators import RegexValidator
 from datetime import datetime
+
 from .models import SalesObjektData, SalesPrognoseData
 from django.utils.translation import gettext_lazy as _
-#from .models_sqlalchemy import SalesPrognose, engine
 
 
 month_choices = [
@@ -32,17 +35,23 @@ def get_month_name(m_id) -> str:
 
 
 class SalesObjektForm(forms.ModelForm):
-    objekt_validator = RegexValidator(
-        regex=r'^[a-zA-ZäöüÄÖÜß\s-]+$',
-        message=_('Nur Buchstaben, Umlaute, Bindestriche und Leerzeichen erlaubt.')
+
+    objekt = forms.ChoiceField(
+        label=_('Objekt'),
+        choices=[('', '--- wählen Sie ein Objekt ---')],
+        widget=forms.Select(attrs={
+            'class': 'form-control select2',
+            'title': _('Bitte wählen Sie ein Objekt.'),
+            'required': True,
+        })
     )
 
     class Meta:
         model = SalesObjektData
-        fields = ['sort_order', 'objekt']
+        fields = ['objekt', 'sort_order']
         labels = {
-            'sort_order': _('Sortierreihenfolge'),
             'objekt': _('Objekt'),
+            'sort_order': _('Sortierreihenfolge'),
         }
         widgets = {
             'sort_order': forms.NumberInput(attrs={
@@ -52,18 +61,47 @@ class SalesObjektForm(forms.ModelForm):
                 'title': _('Nur Zahlen sind erlaubt.'),
                 'required': True,
             }),
-            'objekt': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': _('Objektname eingeben'),
-                'pattern': '[a-zA-ZäöüÄÖÜß\\s-]+',
-                'title': _('Nur Buchstaben, Umlaute, Bindestriche und Leerzeichen erlaubt.'),
-                'required': True,
-            }),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['objekt'].validators.append(self.objekt_validator)
+        try:
+            # muss in deser stelle sein
+            from sales_prognosen_matrix.models_sqlalchemy import ZVM_OBJEKT_DATA_PROVIDER
+            objekte_items = ZVM_OBJEKT_DATA_PROVIDER.get_all_items()
+            # print("DEBUG: objekte_items =", objekte_items)
+            choices = [('', _('--- Objekt auswählen ---'))] + [
+                (item['Kuerzel'], item['Kuerzel']) for item in objekte_items if item.get('Kuerzel')
+            ]
+            self.fields['objekt'].choices = choices
+
+        except Exception as e:
+            print(f"Fehler beim Laden der Objekt-Werte: {e}")
+            self.fields['objekt'].choices = [('', '--- Select an Object ---')]
+            print("DEBUG: objekt choices set to default")
+
+        if self.instance and self.instance.objekt:
+            self.fields['objekt'].initial = self.instance.objekt
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     if self.instance and self.instance.objekt:
+    #         self.fields['objekt'].initial = self.instance.objekt
+    #     self.fields['objekt'].widget.choices = [
+    #         (self.instance.objekt, self.instance.objekt)
+    #     ]
+    #
+    # def clean_objekt(self):
+    #     objekt = self.cleaned_data['objekt']
+    #     try:
+    #         from sales_prognosen_matrix.models_sqlalchemy import ZVM_OBJEKT_DATA_PROVIDER
+    #
+    #         instance = ZVM_OBJEKT_DATA_PROVIDER.get_instance(p_key={'Kuerzel': objekt})
+    #         if not instance:
+    #             raise forms.ValidationError(_('Ungültiges Objekt ausgewählt.'))
+    #         return objekt
+    #     except Exception as e:
+    #         raise forms.ValidationError(_('Fehler beim Validieren des Objekts: %s') % str(e))
 
     def clean_sort_order(self):
         sort_order = self.cleaned_data['sort_order']
@@ -71,32 +109,51 @@ class SalesObjektForm(forms.ModelForm):
             raise forms.ValidationError(_("Sortierreihenfolge darf nicht negativ sein."))
         return sort_order
 
-    def clean_objekt(self):
-        objekt = self.cleaned_data['objekt']
-        if objekt and not objekt.strip():
-            raise forms.ValidationError(_('Objekt darf nicht nur aus Leerzeichen oder Bindestrichen bestehen.'))
-        return objekt
-
 
 class SalesPrognoseForm(forms.ModelForm):
     prognose_validator = RegexValidator(
         regex=r'^\d+(\.\d{1,2})?$',
         message=_('Nur Zahlen oder Gleitkommazahlen mit bis zu 2 Dezimalstellen sind erlaubt.')
     )
+    objekt = forms.ChoiceField(
+        label=_('Objekt'),
+        choices=[('', '--- wählen Sie ein Objekt ---')],
+        widget=forms.Select(attrs={
+            'class': 'form-control select2',
+            'title': _('Bitte wählen Sie ein Objekt.'),
+            'required': True,
+        })
+    )
+
+    sortierreihen_folge_display = forms.IntegerField(
+        label=_('Sortierreihenfolge'),
+        required=False,
+        widget=forms.NumberInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
+    )
 
     jahr = forms.IntegerField(
         required=True,
+        min_value=1900,
+        max_value=datetime.now().year,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Jahr eingeben'),
+            'title': _('Jahr muss zwischen 1900 und dem aktuellen Jahr liegen.'),
+        })
     )
     monat = forms.ChoiceField(
         choices=month_choices,
         required=True,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'title': _('Wählen Sie einen Monat aus.'),
+        })
     )
 
     class Meta:
         model = SalesPrognoseData
-        fields = ['id', 'objekt', 'sortierreihen_folge', 'jahr', 'monat', 'datum', 'prognose']
+        fields = ['objekt', 'sortierreihen_folge', 'jahr', 'monat', 'datum', 'prognose']
         labels = {
-            'id': _('Id'),
             'objekt': _('Objekt'),
             'sortierreihen_folge': _('Sortierreihenfolge'),
             'jahr': _('Jahr'),
@@ -104,14 +161,10 @@ class SalesPrognoseForm(forms.ModelForm):
             'prognose': _('Prognose'),
         }
         widgets = {
-            'id': forms.HiddenInput(),
-            'objekt': forms.Select(attrs={
+            'sortierreihen_folge': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'required': True,
-            }),
-            'sortierreihen_folge': forms.Select(attrs={
-                'class': 'form-control',
-                'required': True,
+                'readonly': 'readonly',
+                'disabled': True,
             }),
             'jahr': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -140,32 +193,123 @@ class SalesPrognoseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['prognose'].validators.append(self.prognose_validator)
 
+        try:
+            # Import SQLAlchemy data provider
+            from .models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
+
+            # Fetch all items from provider
+            objekte_items = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
+            print("DEBUG: objekte_items =", objekte_items)
+
+            # Create choices for objekt dropdown
+            choices = [('', '--- Objekt auswählen ---')] + [
+                (item['objekt'], item['objekt'])
+                for item in objekte_items if item.get('objekt')
+            ]
+            print("DEBUG: choices =", choices)
+            self.fields['objekt'].choices = choices
+
+        except Exception as e:
+            print(f"Fehler beim Laden der Objekt-Werte: {e}")
+            self.fields['objekt'].choices = [('', '--- Select an Object ---')]
+            self._objekte_items = {}
+
+        # Immer readonly und disabled setzen
+        self.fields['sortierreihen_folge'].widget.attrs.update({
+            'readonly': 'readonly',
+            'disabled': True,
+        })
+        #**********
+        # try:
+        #     # SQLAlchemy-Datenprovider importieren
+        #     from .models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
+        #     # Alle Elemente vom Provider holen
+        #     objekte_items = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
+        #     # Debug: Ausgabe der geholten Elemente
+        #     print("DEBUG: objekte_items =", objekte_items)
+        #     # Choices für das objekt-Dropdown erstellen, value ist ein Tupel (objekt, sort_order)
+        #     choices = [('', '--- Objekt auswählen ---')] + [
+        #         ((item['objekt'], item['sort_order']), item['objekt'])
+        #         for item in objekte_items if item.get('objekt') and 'sort_order' in item
+        #     ]
+        #     # Debug: Ausgabe der Choices
+        #     print("DEBUG: choices =", choices)
+        #     self.fields['objekt'].choices = choices
+        #     # Elemente für spätere Verwendung speichern
+        #     self._objekte_items = {item['objekt']: item for item in objekte_items}
+        #     # Debug: Ausgabe des gespeicherten Dictionaries
+        #     print("DEBUG: _objekte_items =", self._objekte_items)
+        #
+        #     # Objekt für Sortierreihenfolge-Ermittlung initialisieren
+        #     objekt = None
+        #     sort_order = None
+        #
+        #     # Bearbeitungs- oder Erstellungsmodus
+        #     if self.instance and self.instance.objekt:  # Bearbeitungsmodus
+        #         objekt = self.instance.objekt
+        #     elif self.data.get('objekt'):  # Erstellungsmodus mit POST-Daten
+        #         objekt_data = self.data.get('objekt')
+        #         # Objekt_data ist ein Tupel, muss dekodiert werden
+        #         try:
+        #             objekt, sort_order = eval(objekt_data) if objekt_data else (None, None)
+        #         except:
+        #             objekt = objekt_data  # Falls kein Tupel, direkt verwenden
+        #     elif self.initial.get('objekt'):  # Initiale Daten
+        #         objekt = self.initial.get('objekt')
+        #
+        #     # Sortierreihenfolge initial setzen
+        #     if objekt and objekt in self._objekte_items:
+        #         sort_order = self._objekte_items[objekt]['sort_order']
+        #         self.fields['sortierreihen_folge'].initial = sort_order
+        #         # Debug: Ausgabe des gesetzten Werts
+        #         print(f"DEBUG: sortierreihen_folge initial set to {sort_order} for objekt {objekt}")
+        #
+        # except Exception as e:
+        #     print(f"Fehler beim Laden der Objekt-Werte: {e}")
+        #     self.fields['objekt'].choices = [('', '--- Select an Object ---')]
+        #     self._objekte_items = {}
+        #
+        #     # Sortierreihenfolge-Feld immer deaktivieren
+        # self.fields['sortierreihen_folge'].widget.attrs.update({
+        #     'readonly': 'readonly',
+        #     'disabled': True,
+        # })
+
+        # try:
+        #     # muss in deser stelle sein
+        #     from .models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
+        #     objekte_items = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
+        #     #print("DEBUG: objekte_items =", objekte_items)
+        #     choices = [('', _('--- Objekt auswählen ---'))] + [
+        #         (item['objekt'], item['objekt']) for item in objekte_items if item.get('objekt')
+        #     ]
+        #     self.fields['objekt'].choices = choices
+        #
+        # except Exception as e:
+        #     print(f"Fehler beim Laden der Objekt-Werte: {e}")
+        #     self.fields['objekt'].choices = [('', '--- Select an Object ---')]
+        #     print("DEBUG: objekt choices set to default")
+
     def clean(self):
         cleaned_data = super().clean()
         jahr = cleaned_data.get('jahr')
         monat = cleaned_data.get('monat')
         objekt = cleaned_data.get('objekt')
-        sortierreihen_folge = cleaned_data.get('sortierreihen_folge')
+        # Set sortierreihen_folge based on objekt
+        if objekt and objekt in self._objekte_items:
+            cleaned_data['sortierreihen_folge'] = self._objekte_items[objekt]['sort_order']
+        else:
+            if objekt:
+                raise forms.ValidationError('Ungültiges Objekt ausgewählt.')
+            cleaned_data['sortierreihen_folge'] = None
+        # if objekt:
+        #     cleaned_data['sortierreihen_folge'] = objekt.sort_order
 
         if jahr and monat:
             try:
                 cleaned_data['datum'] = datetime(int(jahr), int(monat), 1).date()
             except ValueError:
                 raise forms.ValidationError(_("Ungültiges Jahr oder Monat"))
-
-        # if objekt and sortierreihen_folge and 'datum' in cleaned_data:
-        #     with Session(engine) as session:
-        #         existing = session.query(SalesPrognose).filter(
-        #             SalesPrognose.objekt == objekt.objekt,
-        #             SalesPrognose.sortierreihen_folge == sortierreihen_folge.sort_order,
-        #             SalesPrognose.datum == cleaned_data['datum']
-        #         ).first()
-        #         if existing and (not self.instance or existing.id != self.instance.id):
-        #             raise forms.ValidationError(
-        #                 _("Diese Kombination aus Objekt ({})، Sortierreihenfolge ({}) und Datum ({}) existiert bereits.").format(
-        #                     objekt.objekt, sortierreihen_folge.sort_order, cleaned_data['datum']
-        #                 )
-        #             )
 
         return cleaned_data
 

@@ -3,7 +3,6 @@ from django.db import models
 
 class PlanungData(models.Model):
     sap_nr = models.BigIntegerField()
-    id2 = models.BigIntegerField()
     objekt_name = models.CharField(max_length=255, null=True, blank=True)
     jahr = models.IntegerField()
     monat = models.IntegerField()

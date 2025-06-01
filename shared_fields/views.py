@@ -44,7 +44,17 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
             "selected_parent": selected_parent})
 
     else:
-        form = form_class(instance=django_instance)
+        #form = form_class(instance=django_instance)
+        if django_instance and hasattr(django_instance, '_meta'):
+            # Wenn das Objekt ein Django ORM-Objekt ist
+            form = form_class(instance=django_instance)
+        elif django_instance:
+            # Wenn das Objekt ein SQLAlchemy-Objekt ist, nutze initial und filtere private Felder heraus
+            initial_data = {k: v for k, v in django_instance.__dict__.items() if not k.startswith('_')}
+            form = form_class(initial=initial_data)
+        else:
+            # Wenn kein Objekt vorhanden ist, erstelle ein leeres Formular
+            form = form_class()
 
     return render(request, 'global/form_view.html',
                   {

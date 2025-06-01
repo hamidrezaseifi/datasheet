@@ -17,9 +17,8 @@ class SalesObjektData(models.Model):
 
 
 class SalesPrognoseData(models.Model):
-    id = models.BigAutoField(primary_key=True)
     objekt = models.ForeignKey(SalesObjektData, on_delete=models.CASCADE, related_name="sales_data")
-    sortierreihen_folge = models.ForeignKey(SalesObjektData, on_delete=models.CASCADE, related_name="sales_data_sort")
+    sortierreihen_folge = models.IntegerField()
     jahr = models.IntegerField()
     monat = models.IntegerField()
     datum = models.DateField()

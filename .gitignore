@@ -3,3 +3,7 @@
 /.idea
 /.idea/**
 *.ini
+/h_sheet/datasheet/
+/h_sheet/datasheet/**
+
+

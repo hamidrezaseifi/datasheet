@@ -8,16 +8,15 @@ from planung.models import PlanungData
 from shared_fields.data_provider import DataProviderBase, DatabaseConfig, ModelNavigationProvider
 from planung.forms import get_month_name
 
-# from shared_fields.fields import get_month_name
+#from shared_fields.fields import get_month_name
 
 Base = declarative_base()
 
 
 class Planung(Base):
     __tablename__ = 'planung'
-    __table_args__ = {'schema': 'public'}
+    __table_args__ = {'schema': 'test_evar.djange'}
     sap_nr = Column(BigInteger, primary_key=True, nullable=False)
-    id2 = Column(BigInteger, primary_key=True, nullable=False)
     objekt_name = Column(String(255), nullable=True)
     jahr = Column(Integer, nullable=False)
     monat = Column(Integer, nullable=False)
@@ -29,15 +28,14 @@ class PlanungDataProvider(DataProviderBase, ABC):
 
     def __init__(self):
         super().__init__(DatabaseConfig('planung'),
-                         'public',
+                         'test_evar.djange',
                          'planung',
-                         ['sap_nr', 'id2'],
+                         ['sap_nr'],
                          ModelNavigationProvider("Planung", "planung", "Meine Test", self))
         metadata = MetaData()
 
         self._table = Table(self._table_name, metadata,
                             Column('sap_nr', BigInteger, nullable=False, primary_key=True),
-                            Column('id2', BigInteger, nullable=False, primary_key=True),
                             Column('objekt_name', String(255)),
                             Column('jahr', Integer, nullable=False),
                             Column('monat', Integer, nullable=False),
@@ -54,8 +52,8 @@ class PlanungDataProvider(DataProviderBase, ABC):
         return Planung
 
     def get_django_instance(self, p_key, instance):
+        # django_instance = PlanungData.objects.filter(sap_nr=p_key).first()
         django_instance = PlanungData(sap_nr=instance.sap_nr,
-                                      id2=instance.id2,
                                       objekt_name=instance.objekt_name,
                                       jahr=instance.jahr,
                                       monat=instance.monat,
@@ -69,6 +67,7 @@ class PlanungDataProvider(DataProviderBase, ABC):
 
 
 PLANUNG_DATA_PROVIDER = PlanungDataProvider()
+
 
 # y = 2001
 # m = 1

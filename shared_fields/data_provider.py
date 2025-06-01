@@ -6,9 +6,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, List
 
-from sqlalchemy import Table, text
+from sqlalchemy import Table, text, String, Integer, Date
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, InstrumentedAttribute
 
 from shared_fields.model_navigation_provider import ModelNavigationProvider
 
@@ -76,7 +76,7 @@ class DataProviderBase(ABC):
         self._schema_name = schema_name
         self._table_name = table_name
         self._primary_key_list = primary_key_list
-        self._primary_key_list = primary_key_list
+        # self._primary_key_list = primary_key_list
         self._nav_provider = nav_provider
 
         self._engine = create_engine(self._db_config.get_url(), echo=True, future=True)
@@ -224,6 +224,12 @@ class DataProviderBase(ABC):
                 if sort_type is None:
                     sort_type = "asc"
                 qr = qr.order_by(text(sort_col + " " + sort_type))
+            # WICHTIG: Wenn KEIN sort_col vorhanden, MUSS MSSQL trotzdem eine Sortierung bekommen!
+            else:
+                # Füge Standard-Sortierung hinzu, z. B. nach dem ersten Primärschlüssel
+                primary_key = self.get_primary_key()[0]
+                qr = qr.order_by(text(f"{primary_key} ASC"))
+
             if item_count:
                 qr = qr.limit(item_count)
             if page:
@@ -248,6 +254,20 @@ class DataProviderBase(ABC):
                 # print(f"{self.get_model_title()} -> pk-dict: {t1}")
 
             return total, page_count, data_items
+            # for item in items:
+            #     attrs = {key: value for key, value in item.__dict__.items() if not key.startswith('_')}
+            #     data_item = {key: attrs[key] for key in self._columns}
+            #     data_item = self._prepare_items_internal(data_item)
+            #     # Include primary key values directly
+            #     pk_data_item = {key: attrs[key] for key in self.get_primary_key()}
+            #     for pk_key, pk_value in pk_data_item.items():
+            #         data_item[pk_key] = pk_value
+            #     # Keep _dj_pk for other use cases
+            #     base64_string = self.convert_dic_to_base64(pk_data_item)
+            #     data_item['_dj_pk'] = base64_string
+            #     data_items.append(data_item)
+            #
+            # return total, page_count, data_items
 
         except Exception as e:
             print(f"Exception in reading items: {e}")
@@ -256,11 +276,82 @@ class DataProviderBase(ABC):
         finally:
             self._close_session()
 
-    ## TODO Search the columns based on column-type? Search in Palnung -> Jahr: 2017
+    def get_all_items(self):
+        try:
+            # Sitzung und Modell abrufen
+            qr = self._get_session().query(self.get_data_model())
+
+            # Sortierung: Primärschlüssel oder erste Spalte
+            primary_keys = self.get_primary_key()
+            if primary_keys:
+                qr = qr.order_by(*[text(f"{pk} ASC") for pk in primary_keys])
+            elif self._columns:
+                qr = qr.order_by(text(f"{self._columns[0]} ASC"))
+
+            # Daten abrufen
+            items = qr.all()
+            total = len(items)
+            print(f"Total items: {total}")
+
+            # Leere Tabelle prüfen
+            if total == 0:
+                print("Empty table")
+                return []
+
+            # Daten verarbeiten
+            data_items = []
+            for item in items:
+                attrs = {k: v for k, v in item.__dict__.items() if not k.startswith('_')}
+                data_item = {k: attrs[k] for k in self._columns}
+                data_item = self._prepare_items_internal(data_item)
+                pk_data_item = {k: attrs[k] for k in primary_keys}
+                for pk_key, pk_value in pk_data_item.items():
+                    data_item[pk_key] = pk_value
+                data_item['_dj_pk'] = self.convert_dic_to_base64(pk_data_item)
+                data_items.append(data_item)
+
+            print(f"Processed items: {len(data_items)}")
+            return data_items
+
+        except Exception as e:
+            # Fehler protokollieren
+            print(f"Error: {e}")
+            return []
+        finally:
+            # Sitzung schließen
+            self._close_session()
+
     def _get_filter_query(self, search_col, search_value):
         qr = self._get_session().query(self.get_data_model())
-        if search_col and len(search_col) > 0 and search_value and len(search_value) > 0:
-            qr = qr.filter(getattr(self.get_data_model(), search_col).like("%{}%".format(search_value)))
+        model = self.get_data_model()
+
+        if search_col and search_value:
+            column_attr = getattr(model, search_col, None)
+
+            if isinstance(column_attr, InstrumentedAttribute):
+                # Hole den tatsächlichen Typ der Spalte
+                column_type = column_attr.property.columns[0].type
+
+                # Konvertiere den Suchwert ggf.
+                if isinstance(column_type, String):
+                    qr = qr.filter(column_attr.like(f"%{search_value}%"))
+                elif isinstance(column_type, Integer):
+                    try:
+                        int_value = int(search_value)
+                        qr = qr.filter(column_attr == int_value)
+                    except ValueError:
+                        pass  # Falscher Input für Integer-Spalte
+                elif isinstance(column_type, Date):
+                    from datetime import datetime
+                    try:
+                        date_value = datetime.strptime(search_value, "%Y-%m-%d").date()
+                        qr = qr.filter(column_attr == date_value)
+                    except ValueError:
+                        pass  # Falsches Datumsformat
+                else:
+                    # Fallback
+                    qr = qr.filter(column_attr == search_value)
+
         return qr
 
     def convert_dic_to_base64(self, dict_item):

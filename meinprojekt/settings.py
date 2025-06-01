@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'planung.apps.PlanungConfig',  # Neue App hinzufügen
     'sales_prognosen_matrix',
     'aldjemy',  # Für SQLAlchemy-Integration mit Django-Modellen
+    'django_select2',
 ]
 
 MIDDLEWARE = [
@@ -112,6 +113,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -131,7 +137,7 @@ STATICFILES_DIRS = [STATIC_DIR]
 #print("STATIC_DIR: ", STATIC_DIR)
 
 STATIC_URL = 'static/'
-STATIC_ROOT = 'http://127.0.0.1:9090/django/'
+STATIC_ROOT = 'http://127.0.0.1:8000/django/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 #print("STATIC_ROOT: ", STATIC_ROOT)

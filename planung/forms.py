@@ -38,10 +38,6 @@ class PlanungForm(forms.ModelForm):
         regex=r'^\d+$',
         message=_('Nur Zahlen sind erlaubt.')
     )
-    id2_validator = RegexValidator(
-        regex=r'^\d+$',
-        message=_('Nur Zahlen sind erlaubt.')
-    )
 
     # Validator für objekt_name: Buchstaben, Umlaute, Bindestriche, Leerzeichen
     objekt_name_validator = RegexValidator(
@@ -57,10 +53,9 @@ class PlanungForm(forms.ModelForm):
 
     class Meta:
         model = PlanungData
-        fields = ['sap_nr', 'id2', 'objekt_name', 'jahr', 'monat', 'umsatz_art', 'plan']
+        fields = ['sap_nr', 'objekt_name', 'jahr', 'monat', 'umsatz_art', 'plan']
         labels = {
             'sap_nr': _('SAP-Nummer'),
-            'id2': _('Second-ID'),
             'objekt_name': _('Objektname'),
             'jahr': _('Jahr'),
             'monat': _('Monat'),
@@ -71,13 +66,6 @@ class PlanungForm(forms.ModelForm):
             'sap_nr': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': _('SAP-Nummer eingeben'),
-                'pattern': '\\d+',
-                'title': _('Nur Zahlen sind erlaubt.'),
-                'required': True,
-            }),
-            'id2': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': _('Second id'),
                 'pattern': '\\d+',
                 'title': _('Nur Zahlen sind erlaubt.'),
                 'required': True,
@@ -130,25 +118,17 @@ class PlanungForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Füge Validatoren hinzu
         self.fields['sap_nr'].validators.append(self.sap_nr_validator)
-        self.fields['id2'].validators.append(self.id2_validator)
         self.fields['objekt_name'].validators.append(self.objekt_name_validator)
         self.fields['umsatz_art'].validators.append(self.umsatz_art_validator)
         print(f"PlanungForm fields: {self.fields.keys()}")
 
     # Monatsauswahl für das Dropdown
 
-
     def clean_sap_nr(self):
         sap_nr = self.cleaned_data.get('sap_nr')
         if sap_nr and not str(sap_nr).isdigit():
             raise forms.ValidationError(_('SAP-Nummer muss eine positive Zahl sein.'))
         return sap_nr
-
-    def clean_id2(self):
-        id2 = self.cleaned_data.get('id2')
-        if id2 and not str(id2).isdigit():
-            raise forms.ValidationError(_('id2 muss eine positive Zahl sein.'))
-        return id2
 
     def clean_objekt_name(self):
         objekt_name = self.cleaned_data.get('objekt_name')

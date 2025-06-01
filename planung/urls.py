@@ -12,4 +12,3 @@ urlpatterns = PLANUNG_DATA_PROVIDER.get_nav_provider().get_urls(PlanungForm,
                                                                 generic_delete_view,
                                                                 success_view,
                                                                 MENU_MAP)
-

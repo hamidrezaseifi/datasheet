@@ -1,4 +1,5 @@
 # eingabemaske/urls
+from django.urls import path
 
 from eingabemaske.forms import UserDataForm
 from eingabemaske.models_sqlalchemy import EINGABE_DATA_PROVIDER
@@ -13,4 +14,5 @@ urlpatterns = EINGABE_DATA_PROVIDER.get_nav_provider().get_urls(UserDataForm,
                                                                 generic_delete_view,
                                                                 success_view,
                                                                 MENU_MAP)
+
 

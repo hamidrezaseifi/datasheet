@@ -13,7 +13,7 @@ Base = declarative_base()
 
 class Eingabe(Base):
     __tablename__ = 'eingabe'
-    __table_args__ = {'schema': 'public'}
+    __table_args__ = {'schema': 'test_evar.djange'}
     email = Column(String(200), primary_key=True, nullable=False)
     name = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
@@ -23,7 +23,7 @@ class EingabeDataProvider(DataProviderBase):
 
     def __init__(self):
         super().__init__(DatabaseConfig('eingabe'),
-                         'public',
+                         'test_evar.djange',
                          'eingabe',
                          ['email'],
                          ModelNavigationProvider("Eingabe", "eingabe", "Meine Test", self))

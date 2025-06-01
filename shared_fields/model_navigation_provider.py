@@ -46,3 +46,12 @@ class ModelNavigationProvider:
 
     def get_data_provider(self):
         return self._data_provider
+
+
+class DummyModelNavigationProvider(ModelNavigationProvider):
+    def __init__(self):
+        super().__init__('Dummy', 'dummy', 'Dummy', None)
+
+    def get_urls(self, *args, **kwargs):
+        return []
+
