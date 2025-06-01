@@ -94,13 +94,13 @@ class SalesPrognoseForm(forms.ModelForm):
     )
     objekt = forms.ChoiceField(
         label=_('Objekt'),
-        choices=[('1', '--- wählen Sie ein Objekt ---')],
+        choices=[],
         widget=DataSheetChoiceInput(attrs={
             'class': 'form-control',
             'choices': [],
             'item_name': 'Objekt',
             'type': 'file',
-            'on_change': 'objekt_changed();'
+            'on_change': 'objekt_changed();'  # use if needed
         })
     )
 
