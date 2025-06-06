@@ -1,9 +1,11 @@
-from sqlalchemy import MetaData, Table, Column, Integer, String, PrimaryKeyConstraint, DateTime
 from abc import ABC
+
+from sqlalchemy import MetaData, Table, Column, String, PrimaryKeyConstraint, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+
 from shared_fields.data_provider import DataProviderBase, DatabaseConfig
 from shared_fields.model_navigation_provider import ModelNavigationProvider
 from shared_fields.models import ActionLog
-from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 

@@ -1,6 +1,5 @@
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse
 
 from shared_fields.data_provider import DataProviderBase, DuplicateKeyError
 

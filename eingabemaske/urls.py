@@ -1,5 +1,4 @@
 # eingabemaske/urls
-from django.urls import path
 
 from eingabemaske.forms import UserDataForm
 from eingabemaske.models_sqlalchemy import EINGABE_DATA_PROVIDER
