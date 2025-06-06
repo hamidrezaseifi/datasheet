@@ -5,36 +5,12 @@ from datetime import datetime
 from django import forms
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
-
+from shared_fields.fields import month_choices, get_month_name
 from shared_fields.forms import DataSheetChoiceInput
 from .models import SalesObjektData, SalesPrognoseData
 
-month_choices = [
-    (1, _('Januar')),
-    (2, _('Februar')),
-    (3, _('März')),
-    (4, _('April')),
-    (5, _('Mai')),
-    (6, _('Juni')),
-    (7, _('Juli')),
-    (8, _('August')),
-    (9, _('September')),
-    (10, _('Oktober')),
-    (11, _('November')),
-    (12, _('Dezember')),
-]
-
-
-def get_month_name(m_id) -> str:
-    res = [m for m in month_choices if m[0] == m_id]
-    if len(res) > 0:
-        # Konvertiere den übersetzten String in einen normalen String
-        return str(res[0][1])
-    return 'Not-Found!'
-
 
 class SalesObjektForm(forms.ModelForm):
-
     objekt = forms.ChoiceField(
         label=_('Objekt'),
         choices=[('', '--- wählen Sie ein Objekt ---')],
@@ -66,11 +42,34 @@ class SalesObjektForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         try:
             # muss in deser stelle sein
-            from sales_prognosen_matrix.models_sqlalchemy import ZVM_OBJEKT_DATA_PROVIDER
+            from sales_prognosen_matrix.models_sqlalchemy import ZVM_OBJEKT_DATA_PROVIDER, SALES_OBJEKT_DATA_PROVIDER
+
             objekte_items = ZVM_OBJEKT_DATA_PROVIDER.get_all_items()
             # print("DEBUG: objekte_items =", objekte_items)
-            choices = [('', _('--- Objekt auswählen ---'))] + [(item['Kuerzel'], item['Kuerzel']) for item in objekte_items ]
+            filtered_items = [
+                item for item in objekte_items
+                if item['Vertriebsweg'] and item['Vertriebsweg'].lower() != "not"
+            ]
+            sales_objekte_items = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
+            sales_objekte_items = [
+                item['objekt']
+                for item in sales_objekte_items
+            ]
+
+            filtered_items = [
+                item for item in filtered_items
+                if item['Kuerzel'] not in sales_objekte_items
+            ]
+
+            # print("DEBUG: filtered_items =", filtered_items)
+            choices = [('', _('--- Objekt auswählen ---'))] + [(item['Kuerzel'], item['Kuerzel']) for item in
+                                                               filtered_items]
             self.fields['objekt'].choices = choices
+
+            items = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
+            if items:
+                max_order = max(item['sort_order'] or 0 for item in items) + 1
+                self.fields['sort_order'].initial = max_order
 
         except Exception as e:
             print(f"Fehler beim Laden der Objekt-Werte: {e}")
@@ -85,6 +84,14 @@ class SalesObjektForm(forms.ModelForm):
         if sort_order < 0:
             raise forms.ValidationError(_("Sortierreihenfolge darf nicht negativ sein."))
         return sort_order
+
+    def clean_objekt(self):
+        objekt = self.cleaned_data['objekt']
+        # Lazy Import
+        from sales_prognosen_matrix.models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
+        if SALES_OBJEKT_DATA_PROVIDER.check_duplicate_by_pk_dict({'objekt': objekt}):
+            raise forms.ValidationError(_("Dieses Objekt existiert bereits."))
+        return objekt
 
 
 class SalesPrognoseForm(forms.ModelForm):
@@ -125,26 +132,20 @@ class SalesPrognoseForm(forms.ModelForm):
 
     class Meta:
         model = SalesPrognoseData
-        fields = ['objekt', 'sortierreihen_folge', 'jahr', 'monat', 'prognose']
+        fields = ['objekt', 'jahr', 'monat', 'prognose']
         labels = {
             'objekt': _('Objekt'),
-            'sortierreihen_folge': _('Sortierreihenfolge'),
             'jahr': _('Jahr'),
             'monat': _('Monat'),
             'prognose': _('Prognose'),
         }
         widgets = {
-            'sortierreihen_folge': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'readonly': 'readonly',
-                #'disabled': True,
-            }),
             'jahr': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': _('Jahr eingeben'),
-                'min': 1900,
+                'min': 2020,
                 'max': datetime.now().year,
-                'title': _('Jahr muss zwischen 1900 und dem aktuellen Jahr liegen.'),
+                'title': _('Jahr muss zwischen 2020 und dem aktuellen Jahr liegen.'),
                 'required': True,
             }),
             'monat': forms.Select(attrs={
@@ -156,7 +157,6 @@ class SalesPrognoseForm(forms.ModelForm):
             'prognose': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': _('Prognose eingeben'),
-                'step': '0.01',
                 'title': _('Nur Zahlen oder Gleitkommazahlen sind erlaubt.'),
                 'required': True,
             }),
@@ -164,6 +164,8 @@ class SalesPrognoseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['jahr'].initial = datetime.now().year
+        self.fields['prognose'].initial = None
         self.fields['prognose'].validators.append(self.prognose_validator)
 
         try:
@@ -186,21 +188,18 @@ class SalesPrognoseForm(forms.ModelForm):
             self.fields['objekt'].choices = [('', '--- Select an Object ---')]
             self._objekte_items = {}
 
-
     def clean(self):
         cleaned_data = super().clean()
         jahr = cleaned_data.get('jahr')
         monat = cleaned_data.get('monat')
         objekt = cleaned_data.get('objekt')
         # Set sortierreihen_folge based on objekt
-        if objekt and objekt in self._objekte_items:
-            cleaned_data['sortierreihen_folge'] = self._objekte_items[objekt]['sort_order']
-        else:
-            if objekt:
-                raise forms.ValidationError('Ungültiges Objekt ausgewählt.')
-            cleaned_data['sortierreihen_folge'] = None
-        # if objekt:
-        #     cleaned_data['sortierreihen_folge'] = objekt.sort_order
+        # if objekt and objekt in self._objekte_items:
+        #     cleaned_data['sortierreihen_folge'] = self._objekte_items[objekt]['sort_order']
+        # else:
+        #     if objekt:
+        #         raise forms.ValidationError('Ungültiges Objekt ausgewählt.')
+        #     cleaned_data['sortierreihen_folge'] = None
 
         if jahr and monat:
             try:

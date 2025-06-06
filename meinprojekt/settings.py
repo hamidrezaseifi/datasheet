@@ -14,9 +14,6 @@ import os
 from pathlib import Path
 import configparser
 
-
-
-
 # BASE_DIR zeigt auf das Hauptverzeichnis deines Projekts
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,21 +25,21 @@ config.read(init_path)
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!:
-#SECRET_KEY = config['Server']['key']
+# SECRET_KEY = config['Server']['key']
 SECRET_KEY = config['evar']['key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 # for test
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 # for server
-#ALLOWED_HOSTS = ['analyttest.data.heise.de', 'localhost', '127.0.0.1', '2a00:e68:14:1c:d6be:d9ff:fefb:ae05']
-#ALLOWED_HOSTS = ['2a00:e68:14:1c:d6be:d9ff:fefb:ae05', 'analyttest.data.heise.de', 'localhost']
+# ALLOWED_HOSTS = ['analyttest.data.heise.de', 'localhost', '127.0.0.1', '2a00:e68:14:1c:d6be:d9ff:fefb:ae05']
+# ALLOWED_HOSTS = ['2a00:e68:14:1c:d6be:d9ff:fefb:ae05', 'analyttest.data.heise.de', 'localhost']
 
-#SECURE_HSTS_INCLUDE_SUBDOMAINS=False
-#SECURE_HSTS_SECONDS=518400
+# SECURE_HSTS_INCLUDE_SUBDOMAINS=False
+# SECURE_HSTS_SECONDS=518400
 
-#SESSION_COOKIE_SECURE=True
+# SESSION_COOKIE_SECURE=True
 
 # Application definition
 
@@ -58,6 +55,7 @@ INSTALLED_APPS = [
     'sales_prognosen_matrix',
     'aldjemy',  # Für SQLAlchemy-Integration mit Django-Modellen
     'django_select2',
+    'shared_fields',
 ]
 
 MIDDLEWARE = [
@@ -76,7 +74,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR / 'shared_templates' / 'templates',
+            BASE_DIR / 'shared_templates' / 'templates',  # for base.html
+            BASE_DIR / 'sales_prognosen_matrix/templates',  # for sales_objekt
         ],
 
         'APP_DIRS': True,
@@ -92,8 +91,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'meinprojekt.wsgi.application'
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -134,17 +131,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_DIR = os.path.join(BASE_DIR, 'my_static')
 
 STATICFILES_DIRS = [STATIC_DIR]
-#print("STATIC_DIR: ", STATIC_DIR)
+# print("STATIC_DIR: ", STATIC_DIR)
 
 STATIC_URL = 'static/'
 STATIC_ROOT = 'http://127.0.0.1:8000/django/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-#print("STATIC_ROOT: ", STATIC_ROOT)
+# print("STATIC_ROOT: ", STATIC_ROOT)
 
 DEBUG = True
 # for run in server
-#DEBUG = False
+# DEBUG = False
 
 
 # Default primary key field type

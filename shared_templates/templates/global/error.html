@@ -1,11 +1,33 @@
 {% extends 'global/base.html' %}
+{% load i18n %}
 
-{% block title %}fehler{% endblock %}
+{% block title %}{% trans "Fehler" %}{% endblock %}
 
 {% block content %}
 <div class="alert alert-danger" role="alert">
-    <h1>fehler</h1>
-    <p>{{ message|default:"ein fehler ist aufgetreten. bitte versuche es erneut."|lower }}</p>
+    <h1>{% trans "Fehler" %}</h1>
+    <p>{{ message|default:"Ein Fehler ist aufgetreten. Bitte versuche es erneut."|lower }}</p>
 </div>
-<a href="/{{base_url}}/data" class="btn btn-secondary">zurück zum formular</a>
-{% endblock %}
+<a href="{{ return_url|default:'/' }}" class="btn btn-secondary">{% trans "Zurück zum Formular" %}</a>
+{% endblock
+
+
+<!--{% extends 'global/base.html' %}-->
+<!--{% load i18n %}-->
+
+<!--{% block title %}{% trans "Fehler" %}{% endblock %}-->
+
+<!--{% block content %}-->
+<!--<div class="alert alert-danger alert-dismissible fade show" role="alert">-->
+<!--    <h1>-->
+<!--        <i class="bi bi-exclamation-circle me-2"></i>-->
+<!--        {{ title|default:"Fehler" }}-->
+<!--    </h1>-->
+<!--    <p>{{ message|default:"Ein Fehler ist aufgetreten. Bitte versuche es erneut."|lower }}</p>-->
+<!--    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>-->
+<!--</div>-->
+<!--<a href="{{ return_url|default:'/' }}" class="btn btn-secondary">-->
+<!--    {% trans "Zurück zum Formular" %}-->
+<!--    <i class="bi bi-arrow-left-circle ms-2"></i>-->
+<!--</a>-->
+<!--{% endblock %}-->

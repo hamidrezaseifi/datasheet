@@ -1,0 +1,232 @@
+{% extends "global/base.html" %}
+{% load static i18n %}
+
+{% block content %}
+<h2>{{ model_name }} {% trans 'bearbeiten' %}</h2>
+
+{% if messages %}
+<div class="messages mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<form id="add-objekt-form" method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="user" value="Anonymous">
+    <button type="submit" class="btn btn-primary">
+        {% trans 'Objekt hinzufügen' %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+        </svg>
+    </button>
+</form>
+
+<hr>
+
+<h3>{% trans 'Objekte sortieren' %}</h3>
+<div class="list-header">
+    <span class="col-sort-order">#</span>
+    <span class="col-objekt">{% trans 'Objekt' %}</span>
+    <span class="col-user">{% trans 'Benutzer' %}</span>
+    <span class="col-actions">{% trans 'Aktionen' %}</span>
+</div>
+<div class="sortable-parent">
+    <ul id="sortable-list" class="list-group">
+        {% for item in items %}
+            <li class="list-group-item d-flex align-items-center" data-id="{{ item.objekt }}">
+                <span class="col-sort-order">{{ item.sort_order }}</span>
+                <span class="col-objekt">{{ item.objekt }}</span>
+                <span class="col-user">{{ item.user|default:'-' }}</span>
+                <button class="btn btn-danger delete-btn ms-auto" data-id="{{ item.objekt }}" title="{% trans 'Löschen' %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                    </svg>
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+<button id="save-order" class="btn btn-success mt-3">
+    {% trans 'Reihenfolge speichern' %}
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16">
+        <path d="M11 2H9v3h2z"/>
+        <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>
+    </svg>
+</button>
+
+<style>
+    /* CSS für Header und Ausrichtung */
+    .list-header {
+        display: flex;
+        font-weight: bold;
+        padding: 10px 15px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .list-group-item {
+        display: flex;
+        padding: 10px 15px;
+    }
+    .col-objekt {
+        flex: 3;
+    }
+    .col-sort-order {
+        flex: 1;
+        max-width: 100px;
+    }
+    .col-user {
+        flex: 2;
+    }
+    .col-actions {
+        flex: 1;
+        text-align: right;
+    }
+    .delete-btn {
+        margin-left: 10px;
+    }
+    .sortable-parent{
+        overflow-y: auto;
+        height: calc(100vh - 460px);
+    }
+    .list-group-item{
+        padding: 2px 15px;
+    }
+    .list-group-item:hover{
+        background-color: #ffffee;
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+<script>
+// Initialisiert Sortable.js für Drag & Drop
+let sortable = new Sortable(document.getElementById('sortable-list'), {
+    animation: 150
+});
+
+// Funktion zum Abrufen des CSRF-Tokens
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Speichert die neue Sortierreihenfolge
+$('#save-order').on('click', function () {
+    const order = [];
+    $('#sortable-list li').each(function () {
+        order.push($(this).data('id'));
+    });
+
+    $.ajax({
+        url: "{{ save_url }}",
+        method: "POST",
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        data: {
+            action: 'update_order',
+            'order[]': order
+        },
+        success: function () {
+            location.reload();
+        },
+        error: function (xhr) {
+            console.error(xhr.responseJSON?.message || xhr.statusText);
+        }
+    });
+});
+
+// Handhabt das Hinzufügen eines neuen Objekts
+$('#add-objekt-form').on('submit', function (e) {
+    e.preventDefault();
+    $.ajax({
+        url: "{{ add_url }}",
+        method: "POST",
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        data: $(this).serialize(),
+        success: function (response) {
+            if (response.items) {
+                updateSortableList(response.items);
+                $('#add-objekt-form')[0].reset();
+            }
+            location.reload();
+        },
+        error: function (xhr) {
+            console.error(xhr.responseJSON?.message || xhr.statusText);
+        }
+    });
+});
+
+// Funktion zum dynamischen Aktualisieren der Liste
+function updateSortableList(items) {
+    const $sortableList = $('#sortable-list');
+    $sortableList.empty();
+    for (const item of items) {
+        $sortableList.append(`
+            <li class="list-group-item d-flex align-items-center" data-id="${item.objekt}">
+                <span class="col-objekt">${item.objekt}</span>
+                <span class="col-sort-order">${item.sort_order}</span>
+                <span class="col-user">${item.user || '-'}</span>
+                <button class="btn btn-danger delete-btn ms-auto" data-id="${item.objekt}" title="Löschen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                    </svg>
+                </button>
+            </li>
+        `);
+    }
+}
+
+// Löschen eines Objekts via Ajax
+$(document).on('click', '.delete-btn', function () {
+    const objekt = $(this).data('id');
+    if (confirm("{% trans 'Möchten Sie dieses Objekt wirklich löschen?' %}")) {
+        $.ajax({
+            url: "{{ delete_url }}",
+            method: "POST",
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            data: {
+                action: 'delete',
+                objekt: objekt
+            },
+            success: function () {
+                location.reload();
+            },
+            error: function (xhr) {
+                console.error(xhr.responseJSON?.message || xhr.statusText);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

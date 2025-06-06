@@ -8,32 +8,71 @@ class ModelNavigationProvider:
     _base_url: str = ''
     _parent_name: str = ''
     _data_provider: None
+    _crud_template_name: str = None
+    _list_template_name: str = None
 
-    def __init__(self, model_title: str, base_url: str, parent_name: str, data_provider):
+    def __init__(self, model_title: str, base_url: str, parent_name: str, data_provider,
+                 crud_template_name: str = 'global/form_view.html',
+                 list_template_name: str = 'global/list_view.html'):
         self._model_title = model_title
         self._base_url = base_url
         self._parent_name = parent_name
         self._data_provider = data_provider
+        self._crud_template_name = crud_template_name
+        self._list_template_name = list_template_name
 
-    def get_urls(self, form_data, view_create_func, view_list_func, view_delete_func, view_success_func,
-                 menu_map) -> List:
-
-        return [
-            path('', view_list_func,
-                 {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url}),
-            path('list/', view_list_func,
-                 {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url}),
-            path('data/', view_create_func,
-                 {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
-                  'form_class': form_data}),
+    # def get_urls(self, form_data, view_create_func, view_list_func, view_delete_func, view_success_func,
+    #              menu_map) -> List:
+    #
+    #     return [
+    #         path('', view_list_func,
+    #              {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url}),
+    #         path('list/', view_list_func,
+    #              {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url}),
+    #         path('data/', view_create_func,
+    #              {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+    #               'form_class': form_data, 'template_name': self._crud_template_name }),
+    #         path('delete', view_delete_func, {'data_provider': self._data_provider}),
+    #         path('data/<str:primary_key_base64>/', view_create_func,
+    #              {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+    #               'form_class': form_data, 'template_name': self._crud_template_name }),
+    #         path('success', view_success_func,
+    #              {'model_name': self._model_title, 'menu_map': menu_map,
+    #               'base_url': self._base_url}),
+    #     ]
+    def get_urls(
+            self,
+            form_data,
+            view_create_func,
+            view_list_func,
+            view_delete_func,
+            view_success_func,
+            menu_map
+    ) -> List:
+        crud_urls = [
+            path('', view_list_func, {
+                'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+                'template_name': self._list_template_name
+            }),
+            path('list/', view_list_func, {
+                'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+                'template_name': self._list_template_name
+            }),
+            path('data/', view_create_func, {
+                'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+                'form_class': form_data, 'template_name': self._crud_template_name
+            }),
             path('delete', view_delete_func, {'data_provider': self._data_provider}),
-            path('data/<str:primary_key_base64>/', view_create_func,
-                 {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
-                  'form_class': form_data}),
-            path('success', view_success_func,
-                 {'model_name': self._model_title, 'menu_map': menu_map,
-                  'base_url': self._base_url}),
+            path('data/<str:primary_key_base64>/', view_create_func, {
+                'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+                'form_class': form_data, 'template_name': self._crud_template_name
+            }),
+            path('success', view_success_func, {
+                'model_name': self._model_title, 'menu_map': menu_map, 'base_url': self._base_url
+            }),
         ]
+
+        return crud_urls
 
     def get_model_title(self):
         return self._model_title
@@ -54,4 +93,3 @@ class DummyModelNavigationProvider(ModelNavigationProvider):
 
     def get_urls(self, *args, **kwargs):
         return []
-

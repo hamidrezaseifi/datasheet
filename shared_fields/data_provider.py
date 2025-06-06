@@ -8,6 +8,7 @@ from typing import Dict, List
 
 from sqlalchemy import Table, text, String, Integer, Date
 from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker, InstrumentedAttribute
 
 from shared_fields.model_navigation_provider import ModelNavigationProvider
@@ -53,6 +54,11 @@ class DatabaseConfig:
         return f"{self._database_type}://{self._user}:{self._password}@{_server}/{self._database}{additional}"
 
 
+class DuplicateKeyError(Exception):
+    """Fehler, wenn ein Datensatz mit einem bereits existierenden Primärschlüssel eingefügt wird."""
+    pass
+
+
 class DataProviderBase(ABC):
     _db_config: DatabaseConfig = None
     _columns: List[str] = []
@@ -83,6 +89,7 @@ class DataProviderBase(ABC):
         self._session_maker = sessionmaker(autocommit=False, autoflush=False, bind=self._engine)
 
     def _create_table(self) -> [Table, Dict]:
+        """Tabelle erstellen, falls sie nicht existiert."""
         if self._table_created:
             return
         try:
@@ -98,20 +105,28 @@ class DataProviderBase(ABC):
             raise
 
     def _get_session(self):
+        """Sitzung abrufen oder neu erstellen."""
         if self._session is None:
             self._session = self._session_maker()
         return self._session
 
     def _close_session(self):
+        """Sitzung schließen."""
         if self._session:
-            self._session.close()
-            self._session = None
+            try:
+                self._session.close()
+            except Exception as e:
+                print(f"Fehler beim Schließen der Sitzung: {e}")
+            finally:
+                self._session = None
 
     def _commit_session(self):
+        """Sitzung committen."""
         if self._session:
             self._session.commit()
 
     def _rollback_session(self):
+        """Sitzung zurücksetzen."""
         if self._session:
             self._session.rollback()
 
@@ -121,6 +136,7 @@ class DataProviderBase(ABC):
 
     # alt
     def get_instance(self, p_key: dict, close_session: bool = True):
+        """Instanz anhand des Primärschlüssels abrufen."""
         try:
             qr = self._get_session().query(self.get_data_model())
             for attr, value in p_key.items():
@@ -137,12 +153,24 @@ class DataProviderBase(ABC):
             if close_session:
                 self._close_session()
 
+    def check_duplicate_by_pk_dict(self, pk_dict: dict) -> bool:
+        """Check if a record with the given primary key dictionary exists."""
+        try:
+            existing_instance = self.get_instance(pk_dict, close_session=False)
+            return existing_instance is not None
+        except Exception as e:
+            print(f"Fehler beim Prüfen auf Duplikate mit pk_dict: {e}")
+            return False
+        finally:
+            self._close_session()
+
     @abstractmethod
     def get_django_instance(self, p_key, instance):
         pass
 
     # alt
     def delete(self, p_key, instance):
+        """Datensatz löschen."""
         try:
             if instance is None:
                 instance = self.get_instance(p_key)
@@ -157,6 +185,7 @@ class DataProviderBase(ABC):
             self._close_session()
 
     def update(self, p_key, post_data):
+        """Datensatz aktualisieren."""
         try:
             instance = self.get_instance(p_key, False)
             for field_name, value in post_data.items():
@@ -174,20 +203,37 @@ class DataProviderBase(ABC):
             self._close_session()
 
     def add(self, post_data):
-
+        """Neuen Datensatz hinzufügen."""
         instance = self._create_new_instance(post_data)
         try:
+            # Prüfen auf Duplikate
+            pk_dict = {key: getattr(instance, key) for key in self._primary_key_list}
+            if self.check_duplicate_by_pk_dict(pk_dict):
+                raise DuplicateKeyError(
+                    f"Ein Datensatz mit diesem Primärschlüssel ({', '.join(self._primary_key_list)}) existiert bereits."
+                )
+
             self._get_session().add(instance)
             self._commit_session()
-
+        except DuplicateKeyError as e:
+            print(f"Duplikat-Schlüssel-Fehler: {e}")
+            self._rollback_session()
+            raise
+        except IntegrityError as e:
+            print(f"IntegrityError beim Hinzufügen: {e}")
+            self._rollback_session()
+            raise DuplicateKeyError(
+                f"Ein Datensatz mit diesem Primärschlüssel ({', '.join(self._primary_key_list)}) existiert bereits."
+            )
         except Exception as e:
-            print(f"Exception in adding item: {e}")
+            print(f"Fehler beim Hinzufügen des Elements: {e}")
             self._rollback_session()
             raise
         finally:
             self._close_session()
 
     def _create_new_instance(self, post_data):
+        """Neue Instanz aus POST-Daten erstellen."""
         instance = self.get_data_model()()
         for field_name, value in post_data.items():
             if hasattr(instance, field_name):
@@ -196,6 +242,7 @@ class DataProviderBase(ABC):
         return instance
 
     def get_columns(self) -> List[str]:
+        """Spalten der Tabelle abrufen."""
         return self._columns
 
     def get_items(self,
@@ -205,7 +252,7 @@ class DataProviderBase(ABC):
                   sort_type: str = None,
                   search_col: str = None,
                   search_value: str = None) -> [int, int, List[object]]:
-
+        """Datensätze mit Paginierung und Sortierung abrufen."""
         try:
 
             qr = self._get_filter_query(search_col, search_value)
@@ -247,6 +294,12 @@ class DataProviderBase(ABC):
                 data_item['_dj_pk'] = base64_string
                 data_items.append(data_item)
 
+                # print(f"{self.get_model_title()} -> pk-64: {base64_string}")
+
+                t1 = self.convert_base64_to_dic(base64_string)
+
+                # print(f"{self.get_model_title()} -> pk-dict: {t1}")
+
             return total, page_count, data_items
 
         except Exception as e:
@@ -257,6 +310,7 @@ class DataProviderBase(ABC):
             self._close_session()
 
     def get_all_items(self) -> List:
+        """Alle Datensätze abrufen."""
         try:
             # Sitzung und Modell abrufen
             qr = self._get_session().query(self.get_data_model())
@@ -302,6 +356,7 @@ class DataProviderBase(ABC):
             self._close_session()
 
     def _get_filter_query(self, search_col, search_value):
+        """Filterabfrage für Suchen erstellen."""
         qr = self._get_session().query(self.get_data_model())
         model = self.get_data_model()
 
@@ -335,6 +390,7 @@ class DataProviderBase(ABC):
         return qr
 
     def convert_dic_to_base64(self, dict_item):
+        """Dictionary in Base64-String umwandeln."""
         pk_as_str = json.dumps(dict_item)
         pk_as_str_bytes = pk_as_str.encode("utf8")
         base64_bytes = base64.b64encode(pk_as_str_bytes)
@@ -343,6 +399,7 @@ class DataProviderBase(ABC):
         return base64_string
 
     def convert_base64_to_dic(self, base64_string):
+        """Base64-String in Dictionary umwandeln."""
         base64_bytes = base64_string.encode("ascii")
 
         string_bytes = base64.b64decode(base64_bytes)
@@ -352,11 +409,20 @@ class DataProviderBase(ABC):
 
         return json_dict
 
+    def get_instance_from_hash(self, base64_pk: str):
+        try:
+            pk_dict = self.convert_base64_to_dic(base64_pk)
+            return self.get_instance(pk_dict)
+        except Exception as e:
+            print(f"Fehler bei get_instance_from_hash: {e}")
+            raise
+
     @abstractmethod
     def _prepare_items_internal(self, data_item):
         pass
 
     def get_nav_provider(self) -> ModelNavigationProvider:
+        """Navigations-Provider abrufen."""
         return self._nav_provider
 
     def get_primary_key(self) -> List[str]:
@@ -365,3 +431,4 @@ class DataProviderBase(ABC):
     @abstractmethod
     def get_edit_extra_data(self) -> Dict[str, object]:
         pass
+

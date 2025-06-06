@@ -18,6 +18,8 @@ class ZvmObjekte(Base):
     __tablename__ = 'zvm_objekte'
     __table_args__ = {'schema': 'ZVM_STAGING.stage', 'quote': False, 'extend_existing': True}
     Kuerzel = Column(String(255), nullable=False, primary_key=True, name='Kuerzel', quote=False)
+    rep_Kuerzel = Column(String(255), nullable=False, name='rep_Kuerzel', quote=False)
+    Vertriebsweg = Column(String(255), nullable=False, name='Vertriebsweg', quote=False)
 
 
 class ZvmObjektProvider(DataProviderBase, ABC):
@@ -33,12 +35,15 @@ class ZvmObjektProvider(DataProviderBase, ABC):
         metadata = MetaData()
         engine = self._engine  # von DataProviderBase bereitgestellt
 
-        self._table = Table(
-            self._table_name,
-            metadata,
-            autoload_with=engine,
-            schema=self._schema_name
-        )
+        self._table = Table(self._table_name, metadata,
+                            Column('Kuerzel', String(255), primary_key=True, nullable=False),
+                            Column('rep_Kuerzel', String(255), nullable=False),
+                            Column('Vertriebsweg', String(255), nullable=True),
+                            PrimaryKeyConstraint('Kuerzel', name=self._table_name + '_PK', mssql_clustered=True),
+                            schema=self._schema_name)
+        self._columns = [c[0] for c in self._table.columns.items()]
+        self.autoload_with = engine,
+        self.schema = self._schema_name
 
     def _prepare_items_internal(self, data_item):
         # Nur wenn du später Transformation brauchst
@@ -63,6 +68,7 @@ class SalesObjekt(Base):
     __table_args__ = {'schema': 'test_evar.djange'}
     objekt = Column(String(100), nullable=False, primary_key=True, unique=False)
     sort_order = Column(Integer, nullable=True)
+    user = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     sales_date = relationship(
@@ -79,12 +85,16 @@ class SalesObjektProvider(DataProviderBase, ABC):
                          'test_evar.djange',
                          'sales_objekt',
                          ['objekt'],
-                         ModelNavigationProvider("Objekte", "sales/objekte", "Sales", self))
+                         ModelNavigationProvider("Objekte",
+                                                 "sales/objekte",
+                                                 "Sales", self
+                                                 , list_template_name='sales_prognosen_matrix/sortable_objekt.html'))
         metadata = MetaData()
 
         self._table = Table(self._table_name, metadata,
                             Column('objekt', String(255), primary_key=True, nullable=False),
                             Column('sort_order', Integer, nullable=False),
+                            Column('user', String(255), nullable=True),
                             Column('created_at', DateTime),
                             PrimaryKeyConstraint('objekt', name=self._table_name + '_PK', mssql_clustered=True),
                             schema=self._schema_name
@@ -101,6 +111,7 @@ class SalesObjektProvider(DataProviderBase, ABC):
     def get_django_instance(self, p_key, instance):
         django_instance = SalesObjekt(objekt=instance.objekt,
                                       sort_order=instance.sort_order,
+                                      user=instance.user,
                                       created_at=instance.created_at)
         return django_instance
 
@@ -122,11 +133,11 @@ class SalesPrognose(Base):
     __table_args__ = {'schema': 'test_evar.djange'}
 
     objekt = Column(BigInteger, ForeignKey('test_evar.djange.sales_objekt.objekt'), primary_key=True, nullable=False)
-    sortierreihen_folge = Column(BigInteger, ForeignKey('test_evar.djange.sales_objekt.sort_order'), primary_key=True, nullable=False)
     jahr = Column(Integer, primary_key=True, nullable=False)
     monat = Column(Integer, primary_key=True, nullable=False)
     datum = Column(Date, nullable=True)
     prognose = Column(Float, default=0.0, nullable=True)
+    user = Column(String(255), nullable=True)
     created_at = Column(Date, default=datetime.utcnow, nullable=True)
 
     sales_objekt = relationship(
@@ -142,19 +153,19 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
         super().__init__(DatabaseConfig('SalesPrognose'),
                          'test_evar.djange',
                          'sales_prognose',
-                         ['objekt', 'sortierreihen_folge', 'jahr', 'monat'],
+                         ['objekt', 'jahr', 'monat'],
                          ModelNavigationProvider("Prognose", "sales/prognose", "Sales", self))
         metadata = MetaData()
 
         self._table = Table(self._table_name, metadata,
-                            Column('objekt', String(255), primary_key=True,  nullable=False),
-                            Column('sortierreihen_folge', Integer, primary_key=True, nullable=False),
+                            Column('objekt', String(255), primary_key=True, nullable=False),
                             Column('jahr', Integer, primary_key=True, nullable=False),
                             Column('monat', Integer, primary_key=True, nullable=False),
                             Column('datum', Date, nullable=True),
                             Column('prognose', Float, nullable=True),
+                            Column('user', String(255), nullable=True),
                             Column('created_at', DateTime),
-                            PrimaryKeyConstraint('objekt', 'sortierreihen_folge', 'jahr', 'monat',
+                            PrimaryKeyConstraint('objekt', 'jahr', 'monat',
                                                  name=self._table_name + '_PK', mssql_clustered=False),
                             schema=self._schema_name
                             )
@@ -181,14 +192,14 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
 
     def get_django_instance(self, p_key, instance):
         jahr = instance.jahr
-        monat = instance.mona
+        monat = instance.monat
         datum = date(jahr, monat, 1) if jahr and monat else None
         django_instance = SalesPrognose(objekt=instance.objekt,
-                                        sortierreihen_folge=instance.sortierreihen_folge,
                                         jahr=instance.jahr,
                                         monat=instance.monat,
                                         datum=datum,
                                         prognose=instance.prognose if instance else 0.0,
+                                        user=instance.user,
                                         created_at=instance.created_at if instance else datetime.utcnow().date()
                                         )
         return django_instance
@@ -204,9 +215,10 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
         return "sales_objekt"
 
     def get_edit_extra_data(self) -> Dict[str, object]:
-        objects = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
-
-        return {"objects": {r["objekt"]: r["sort_order"] for r in objects}}
+        # objects = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
+        #
+        # return {"objects": {r["objekt"]: r["sort_order"] for r in objects}}
+        return {}
 
 
 SALES_PROGNOSE_DATA_PROVIDER = SalesPrognoseProvider()
