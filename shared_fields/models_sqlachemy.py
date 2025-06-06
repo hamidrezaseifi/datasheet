@@ -36,7 +36,7 @@ class ActionLogProvider(DataProviderBase, ABC):
 
     def get_django_instance(self, p_key, instance):
         django_instance = ActionLog(id=instance.id,
-                                    user=instance.user,
+                                    user=instance.user_name,
                                     action=instance.action,
                                     message=instance.message,
                                     created_at=instance.created_at)

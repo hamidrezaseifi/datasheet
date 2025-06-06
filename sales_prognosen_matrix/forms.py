@@ -18,6 +18,7 @@ class SalesObjektForm(forms.ModelForm):
             'class': 'form-control select2',
             'title': _('Bitte wählen Sie ein Objekt.'),
             'required': True,
+            'onchange': "validateAdd();"
         })
     )
 
@@ -35,6 +36,7 @@ class SalesObjektForm(forms.ModelForm):
                 'pattern': '\\d+',
                 'title': _('Nur Zahlen sind erlaubt.'),
                 'required': True,
+                'onchange': "validateAdd();"
             }),
         }
 

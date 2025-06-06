@@ -24,7 +24,7 @@ class EingabeDataProvider(DataProviderBase):
 
     def __init__(self):
         super().__init__(DatabaseConfig('eingabe'),
-                         'test_evar.djange',
+                         'djange',
                          'eingabe',
                          ['email'],
                          ModelNavigationProvider("Eingabe", "eingabe", "Meine Test", self))

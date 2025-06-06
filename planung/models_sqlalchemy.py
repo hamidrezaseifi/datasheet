@@ -29,7 +29,7 @@ class PlanungDataProvider(DataProviderBase, ABC):
 
     def __init__(self):
         super().__init__(DatabaseConfig('planung'),
-                         'test_evar.djange',
+                         'djange',
                          'planung',
                          ['sap_nr'],
                          ModelNavigationProvider("Planung", "planung", "Meine Test", self))

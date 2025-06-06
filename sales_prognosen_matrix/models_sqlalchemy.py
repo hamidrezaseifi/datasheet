@@ -16,7 +16,7 @@ Base = declarative_base()
 
 class ZvmObjekte(Base):
     __tablename__ = 'zvm_objekte'
-    __table_args__ = {'schema': 'ZVM_STAGING.stage', 'quote': False, 'extend_existing': True}
+    __table_args__ = {'schema': 'stage', 'quote': False, 'extend_existing': True}
     Kuerzel = Column(String(255), nullable=False, primary_key=True, name='Kuerzel', quote=False)
     rep_Kuerzel = Column(String(255), nullable=False, name='rep_Kuerzel', quote=False)
     Vertriebsweg = Column(String(255), nullable=False, name='Vertriebsweg', quote=False)
@@ -65,10 +65,10 @@ ZVM_OBJEKT_DATA_PROVIDER = ZvmObjektProvider()
 
 class SalesObjekt(Base):
     __tablename__ = 'sales_objekt'
-    __table_args__ = {'schema': 'test_evar.djange'}
+    __table_args__ = {'schema': 'djange'}
     objekt = Column(String(100), nullable=False, primary_key=True, unique=False)
     sort_order = Column(Integer, nullable=True)
-    user = Column(String(255), nullable=True)
+    user_name = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     sales_date = relationship(
@@ -82,7 +82,7 @@ class SalesObjektProvider(DataProviderBase, ABC):
     def __init__(self):
         print("Initializing SalesObjektProvider")
         super().__init__(DatabaseConfig('SalesObjekt'),
-                         'test_evar.djange',
+                         'djange',
                          'sales_objekt',
                          ['objekt'],
                          ModelNavigationProvider("Objekte",
@@ -94,7 +94,7 @@ class SalesObjektProvider(DataProviderBase, ABC):
         self._table = Table(self._table_name, metadata,
                             Column('objekt', String(255), primary_key=True, nullable=False),
                             Column('sort_order', Integer, nullable=False),
-                            Column('user', String(255), nullable=True),
+                            Column('user_name', String(255), nullable=True),
                             Column('created_at', DateTime),
                             PrimaryKeyConstraint('objekt', name=self._table_name + '_PK', mssql_clustered=True),
                             schema=self._schema_name
@@ -111,7 +111,7 @@ class SalesObjektProvider(DataProviderBase, ABC):
     def get_django_instance(self, p_key, instance):
         django_instance = SalesObjekt(objekt=instance.objekt,
                                       sort_order=instance.sort_order,
-                                      user=instance.user,
+                                      user_name=instance.user_name,
                                       created_at=instance.created_at)
         return django_instance
 
@@ -130,14 +130,14 @@ SALES_OBJEKT_DATA_PROVIDER = SalesObjektProvider()
 
 class SalesPrognose(Base):
     __tablename__ = 'sales_prognose'
-    __table_args__ = {'schema': 'test_evar.djange'}
+    __table_args__ = {'schema': 'djange'}
 
-    objekt = Column(BigInteger, ForeignKey('test_evar.djange.sales_objekt.objekt'), primary_key=True, nullable=False)
+    objekt = Column(BigInteger, ForeignKey('djange.sales_objekt.objekt'), primary_key=True, nullable=False)
     jahr = Column(Integer, primary_key=True, nullable=False)
     monat = Column(Integer, primary_key=True, nullable=False)
     datum = Column(Date, nullable=True)
     prognose = Column(Float, default=0.0, nullable=True)
-    user = Column(String(255), nullable=True)
+    user_name = Column(String(255), nullable=True)
     created_at = Column(Date, default=datetime.utcnow, nullable=True)
 
     sales_objekt = relationship(
@@ -151,7 +151,7 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
 
     def __init__(self):
         super().__init__(DatabaseConfig('SalesPrognose'),
-                         'test_evar.djange',
+                         'djange',
                          'sales_prognose',
                          ['objekt', 'jahr', 'monat'],
                          ModelNavigationProvider("Prognose", "sales/prognose", "Sales", self))
@@ -163,7 +163,7 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
                             Column('monat', Integer, primary_key=True, nullable=False),
                             Column('datum', Date, nullable=True),
                             Column('prognose', Float, nullable=True),
-                            Column('user', String(255), nullable=True),
+                            Column('user_name', String(255), nullable=True),
                             Column('created_at', DateTime),
                             PrimaryKeyConstraint('objekt', 'jahr', 'monat',
                                                  name=self._table_name + '_PK', mssql_clustered=False),
@@ -199,7 +199,7 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
                                         monat=instance.monat,
                                         datum=datum,
                                         prognose=instance.prognose if instance else 0.0,
-                                        user=instance.user,
+                                        user_name=instance.user_name,
                                         created_at=instance.created_at if instance else datetime.utcnow().date()
                                         )
         return django_instance
