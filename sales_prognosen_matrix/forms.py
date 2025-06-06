@@ -67,9 +67,11 @@ class SalesObjektForm(forms.ModelForm):
             self.fields['objekt'].choices = choices
 
             items = SALES_OBJEKT_DATA_PROVIDER.get_all_items()
+            max_order = 1
             if items:
                 max_order = max(item['sort_order'] or 0 for item in items) + 1
-                self.fields['sort_order'].initial = max_order
+            self.fields['sort_order'].initial = max_order
+
 
         except Exception as e:
             print(f"Fehler beim Laden der Objekt-Werte: {e}")
