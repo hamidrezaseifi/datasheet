@@ -84,6 +84,24 @@
         }
 
     </style>
+    <script>
+
+        function showError(title, text){
+            $("#errorModelTitle").html(title);
+            $("#errorModelBody").html(text);
+            $("#errorModel").modal('show');
+        }
+
+
+        function showLoading(){
+            //$("#errorModelTitle").html(title);
+            $("#loadingModel").modal('show');
+        }
+        function hideLoading(){
+            //$("#errorModelTitle").html(title);
+            $("#loadingModel").modal('hide');
+        }
+    </script>
 </head>
 <body>
     <div class="d-flex">
@@ -136,7 +154,7 @@
 
 <div class="modal fade" id="errorModel" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog  modal-dialog-centered" role="document">
-    <div class="modal-content">
+        <div class="modal-content">
       <div class="modal-header">
         <div class="modal-title" id="errorModelTitle">Löschen ...</div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -146,7 +164,23 @@
       </div>
 
     </div>
-  </div>
+    </div>
+</div>
+
+<div class="modal fade" id="loadingModel" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog  modal-dialog-centered" role="document">
+        <div class="modal-content">
+
+          <div class="modal-body">
+              <div class="row g-3">
+                  <img style="max-width: 50px;" class="col" src="{% static 'images/loading.gif' %}">
+                  <div class="col" id="loadingModelTitle" style="line-height: 35px">Warten ...</div>
+              </div>
+
+          </div>
+
+    </div>
+    </div>
 </div>
 
 </body>

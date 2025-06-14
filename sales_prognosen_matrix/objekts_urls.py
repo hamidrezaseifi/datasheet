@@ -1,4 +1,4 @@
-from meinprojekt.urls import MENU_MAP
+from shared_fields.menu_provider import PROJECT_MENUS
 from sales_prognosen_matrix.forms import SalesObjektForm
 from sales_prognosen_matrix.models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
 from sales_prognosen_matrix.views import sortable_objekt_list_view, sortable_objekt_delete_view, \
@@ -25,7 +25,7 @@ urlpatterns = (
         sortable_objekt_list_view,
         generic_delete_view,
         success_view,
-        MENU_MAP
+        PROJECT_MENUS
     ) + extract_urls
 
 )

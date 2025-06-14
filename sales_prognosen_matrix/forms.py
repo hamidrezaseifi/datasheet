@@ -74,7 +74,6 @@ class SalesObjektForm(forms.ModelForm):
                 max_order = max(item['sort_order'] or 0 for item in items) + 1
             self.fields['sort_order'].initial = max_order
 
-
         except Exception as e:
             print(f"Fehler beim Laden der Objekt-Werte: {e}")
             self.fields['objekt'].choices = [('', '--- Select an Object ---')]
@@ -111,18 +110,20 @@ class SalesPrognoseForm(forms.ModelForm):
             'choices': [],
             'item_name': 'Objekt',
             'type': 'file',
+            'required': True,
             'on_change': 'objekt_changed();'  # use if needed
         })
     )
 
     jahr = forms.IntegerField(
         required=True,
-        min_value=1900,
+        min_value=2020,
         max_value=datetime.now().year,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'placeholder': _('Jahr eingeben'),
-            'title': _('Jahr muss zwischen 1900 und dem aktuellen Jahr liegen.'),
+            'title': _('Jahr muss zwischen 2020 und dem aktuellen Jahr liegen.'),
+            'required': True,
         })
     )
     monat = forms.ChoiceField(
@@ -131,6 +132,7 @@ class SalesPrognoseForm(forms.ModelForm):
         widget=forms.Select(attrs={
             'class': 'form-control',
             'title': _('Wählen Sie einen Monat aus.'),
+            'required': True,
         })
     )
 
@@ -183,7 +185,8 @@ class SalesPrognoseForm(forms.ModelForm):
             # Create choices for objekt dropdown
             choices = [
                 (item['objekt'], item['objekt'])
-                for item in objekte_items if item.get('objekt')
+                for item in objekte_items if item.get('objekt') and item['objekt'].strip() != ''
+               #for item in objekte_items if item.get('objekt')
             ]
             self.fields['objekt'].choices = choices
 
@@ -197,13 +200,6 @@ class SalesPrognoseForm(forms.ModelForm):
         jahr = cleaned_data.get('jahr')
         monat = cleaned_data.get('monat')
         objekt = cleaned_data.get('objekt')
-        # Set sortierreihen_folge based on objekt
-        # if objekt and objekt in self._objekte_items:
-        #     cleaned_data['sortierreihen_folge'] = self._objekte_items[objekt]['sort_order']
-        # else:
-        #     if objekt:
-        #         raise forms.ValidationError('Ungültiges Objekt ausgewählt.')
-        #     cleaned_data['sortierreihen_folge'] = None
 
         if jahr and monat:
             try:
@@ -212,6 +208,14 @@ class SalesPrognoseForm(forms.ModelForm):
                 raise forms.ValidationError(_("Ungültiges Jahr oder Monat"))
 
         return cleaned_data
+
+    def clean_objekt(self):
+        objekt = self.cleaned_data.get('objekt')
+        if not objekt or objekt.strip() == '':
+            raise forms.ValidationError(_('Objekt darf nicht leer sein.'))
+        if objekt not in [choice[0] for choice in self.fields['objekt'].choices]:
+            raise forms.ValidationError(_('Ungültiges Objekt ausgewählt.'))
+        return objekt
 
     def clean_prognose(self):
         prognose = self.cleaned_data['prognose']

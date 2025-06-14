@@ -4,9 +4,9 @@ from django.utils.translation import gettext_lazy as _
 
 
 class SalesObjektData(models.Model):
-    objekt = models.CharField(max_length=255)
+    objekt = models.CharField(max_length=255, null=False)
     sort_order = models.IntegerField()
-    user = models.CharField(max_length=255, null=True, blank=True)
+    user_name = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -18,12 +18,12 @@ class SalesObjektData(models.Model):
 
 
 class SalesPrognoseData(models.Model):
-    objekt = models.ForeignKey(SalesObjektData, on_delete=models.CASCADE, related_name="sales_data")
-    jahr = models.IntegerField()
-    monat = models.IntegerField()
+    objekt = models.ForeignKey(SalesObjektData, on_delete=models.CASCADE, related_name="sales_data", null=False)
+    jahr = models.IntegerField(null=False)
+    monat = models.IntegerField(null=False)
     datum = models.DateField()
     prognose = models.FloatField(default=0.0)
-    user = models.CharField(max_length=255, null=True, blank=True)
+    user_name = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateField(auto_now_add=True, verbose_name=_("Erstellt am"))
 
     def __str__(self):

@@ -1,4 +1,5 @@
-from meinprojekt.urls import MENU_MAP
+from shared_fields.menu_provider import PROJECT_MENUS
+
 from planung.forms import PlanungForm
 from planung.models_sqlalchemy import PLANUNG_DATA_PROVIDER
 from shared_fields.views import generic_crud_view, generic_list_view, success_view, generic_delete_view
@@ -11,4 +12,4 @@ urlpatterns = PLANUNG_DATA_PROVIDER.get_nav_provider().get_urls(PlanungForm,
                                                                 generic_list_view,
                                                                 generic_delete_view,
                                                                 success_view,
-                                                                MENU_MAP)
+                                                                PROJECT_MENUS)

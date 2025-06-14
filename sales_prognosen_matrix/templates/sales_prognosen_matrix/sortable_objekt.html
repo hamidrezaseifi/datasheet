@@ -22,25 +22,16 @@
     <input type="hidden" name="user_name" value="Anonymous">
 
     <div>
-        <button type="submit" class="btn btn-primary" style="width: 130px;" disabled id="btn_add" >
+        <button type="button" class="btn btn-primary" style="width: 130px;" disabled id="btn_add">
             {% trans 'hinzufügen' %}
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-            </svg>
+            <i class="bi bi-plus-circle" style="font-size: 16px;"></i>
         </button>
         <span class="placeholder" style="width: calc(100% - 350px); cursor: default; background: transparent;"></span>
-
-        <button id="save-order" class="btn btn-success" style="width: 210px;" disabled>
+        <button id="save-order" type="button" class="btn btn-success" style="width: 210px;" disabled>
             {% trans 'Reihenfolge speichern' %}
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ol" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5"/>
-              <path d="M1.713 11.865v-.474H2c.217 0 .363-.137.363-.317 0-.185-.158-.31-.361-.31-.223 0-.367.152-.373.31h-.59c.016-.467.373-.787.986-.787.588-.002.954.291.957.703a.595.595 0 0 1-.492.594v.033a.615.615 0 0 1 .569.631c.003.533-.502.8-1.051.8-.656 0-1-.37-1.008-.794h.582c.008.178.186.306.422.309.254 0 .424-.145.422-.35-.002-.195-.155-.348-.414-.348h-.3zm-.004-4.699h-.604v-.035c0-.408.295-.844.958-.844.583 0 .96.326.96.756 0 .389-.257.617-.476.848l-.537.572v.03h1.054V9H1.143v-.395l.957-.99c.138-.142.293-.304.293-.508 0-.18-.147-.32-.342-.32a.33.33 0 0 0-.342.338zM2.564 5h-.635V2.924h-.031l-.598.42v-.567l.629-.443h.635z"/>
-            </svg>
+            <i class="bi bi-list-ol" style="font-size: 16px;"></i>
         </button>
     </div>
-
-
 </form>
 
 <hr>
@@ -55,15 +46,12 @@
 <div class="sortable-parent">
     <ul id="sortable-list" class="list-group">
         {% for item in items %}
-            <li class="list-group-item d-flex align-items-center" data-id="{{ item.objekt }}">
+            <li class="list-group-item objekt-data-item d-flex align-items-center" data-id="{{ item.objekt }}">
                 <span class="col-sort-order">{{ item.sort_order }}</span>
                 <span class="col-objekt">{{ item.objekt }}</span>
                 <span class="col-user">{{ item.user_name|default:'-' }}</span>
                 <button class="btn btn-danger delete-btn ms-auto" data-id="{{ item.objekt }}" title="{% trans 'Löschen' %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                    </svg>
+                    <i class="bi bi-trash"></i>
                 </button>
             </li>
         {% endfor %}
@@ -105,10 +93,10 @@
         overflow-y: auto;
         height: calc(100vh - 460px);
     }
-    .list-group-item{
+    .objekt-data-item{
         padding: 2px 15px;
     }
-    .list-group-item:hover{
+    .objekt-data-item:hover{
         background-color: #ffffee;
     }
 </style>
@@ -117,7 +105,7 @@
 
 {% block extra_js %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script src="{% static 'js/Sortable.min.js' %}"></script>
 
 <script>
 // Initialisiert Sortable.js für Drag & Drop
@@ -150,6 +138,7 @@ $('#save-order').on('click', function () {
     $('#sortable-list li').each(function () {
         order.push($(this).data('id'));
     });
+    showLoading("");
 
     $.ajax({
         url: "{{ save_url }}",
@@ -163,8 +152,10 @@ $('#save-order').on('click', function () {
         },
         success: function () {
             location.reload();
+            hideLoading("");
         },
         error: function (xhr) {
+            hideLoading("");
             showError("{% trans 'Fehler bei Speichern von Sortierreihenfolge!' %}", xhr.responseJSON?.message);
             console.error(xhr.responseJSON?.message || xhr.statusText);
         }
@@ -172,8 +163,9 @@ $('#save-order').on('click', function () {
 });
 
 // Handhabt das Hinzufügen eines neuen Objekts
-$('#add-objekt-form').on('submit', function (e) {
+$('#btn_add').on('click', function (e) {
     e.preventDefault();
+    showLoading("");
     $.ajax({
         url: "{{ add_url }}",
         method: "POST",
@@ -186,9 +178,11 @@ $('#add-objekt-form').on('submit', function (e) {
                 updateSortableList(response.items);
                 $('#add-objekt-form')[0].reset();
             }
+            hideLoading("");
             location.reload();
         },
         error: function (xhr) {
+            hideLoading("");
             showError("{% trans 'Fehler bei Hinzufügen!' %}", xhr.responseJSON?.message);
             console.error(xhr.responseJSON?.message || xhr.statusText);
         }
@@ -205,11 +199,10 @@ function updateSortableList(items) {
                 <span class="col-objekt">${item.objekt}</span>
                 <span class="col-sort-order">${item.sort_order}</span>
                 <span class="col-user">${item.user || '-'}</span>
-                <button class="btn btn-danger delete-btn ms-auto" data-id="${item.objekt}" title="Löschen">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                    </svg>
+                    <button class="btn btn-danger delete-btn ms-auto" data-id="${item.objekt}" title="Löschen">
+                        <button class="btn btn-danger delete-btn ms-auto" data-id="{{ item.objekt }}" title="{% trans 'Löschen' %}">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </button>
             </li>
         `);
@@ -230,16 +223,11 @@ function validateAdd(){
 
 }
 
-function showError(title, text){
-    $("#errorModelTitle").html(title);
-    $("#errorModelBody").html(text);
-    $("#errorModel").modal('show');
-}
-
 // Löschen eines Objekts via Ajax
 $(document).on('click', '.delete-btn', function () {
     const objekt = $(this).data('id');
     if (confirm("{% trans 'Möchten Sie dieses Objekt wirklich löschen?' %}")) {
+        showLoading("");
         $.ajax({
             url: "{{ delete_url }}",
             method: "POST",
@@ -252,13 +240,22 @@ $(document).on('click', '.delete-btn', function () {
             },
             success: function () {
                 location.reload();
+                hideLoading("");
             },
             error: function (xhr) {
+                hideLoading("");
                 showError("{% trans 'Fehler bei Löschen!' %}", xhr.responseJSON?.message);
                 console.error(xhr.responseJSON?.message || xhr.statusText);
             }
         });
     }
 });
+
+$(document).ready(function(){
+
+
+});
+
+
 </script>
 {% endblock %}

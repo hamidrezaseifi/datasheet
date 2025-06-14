@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from meinprojekt.urls import MENU_MAP
+from shared_fields.menu_provider import PROJECT_MENUS
 from sales_prognosen_matrix.models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
 from shared_fields.data_provider import DataProviderBase
 from shared_fields.views import get_selected_parent
@@ -27,8 +27,8 @@ def sortable_objekt_list_view(request, data_provider: DataProviderBase, base_url
         'form': form,
         'model_name': model_name,
         'base_url': base_url,
-        'menu_map': MENU_MAP,
-        'selected_parent': get_selected_parent(MENU_MAP, request),
+        'menu_map': PROJECT_MENUS,
+        'selected_parent': get_selected_parent(PROJECT_MENUS, request),
         'object_sort_map': object_sort_map,
         'return_url': return_url,
         'delete_url': delete_url,
@@ -38,9 +38,8 @@ def sortable_objekt_list_view(request, data_provider: DataProviderBase, base_url
 
 
 def sortable_objekt_delete_view(request):
-
     try:
-        obj = request.POST['objekt'] #{"objekt": obj}
+        obj = request.POST['objekt']
         SALES_OBJEKT_DATA_PROVIDER.delete({"objekt": obj}, None)
 
         return JsonResponse({
@@ -57,7 +56,6 @@ def sortable_objekt_delete_view(request):
 
 
 def sortable_objekt_add_view(request):
-    #items = _get_sortable_objekt_items()
     try:
         SALES_OBJEKT_DATA_PROVIDER.add(request.POST)
 
@@ -75,7 +73,6 @@ def sortable_objekt_add_view(request):
 
 
 def sortable_objekt_save_view(request):
-
     new_order = request.POST.getlist('order[]')
     if not new_order:
         return JsonResponse({

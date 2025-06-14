@@ -208,6 +208,12 @@ class DataProviderBase(ABC):
         try:
             # Prüfen auf Duplikate
             pk_dict = {key: getattr(instance, key) for key in self._primary_key_list}
+
+            # Check for null or empty primary key values
+            invalid_keys = [key for key, value in pk_dict.items() if value is None or value == '']
+            if invalid_keys:
+                raise ValueError(f"Primärschlüssel darf weder NULL noch leer sein: {', '.join(invalid_keys)}")
+
             if self.check_duplicate_by_pk_dict(pk_dict):
                 raise DuplicateKeyError(
                     f"Ein Datensatz mit diesem Primärschlüssel ({', '.join(self._primary_key_list)}) existiert bereits."

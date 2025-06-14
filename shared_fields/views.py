@@ -1,5 +1,6 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 from shared_fields.data_provider import DataProviderBase, DuplicateKeyError
 
@@ -50,7 +51,7 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
             # print(f"inserting sqlalchemy: {instance}")
             try:
                 data_provider.add(request.POST)
-            except DuplicateKeyError as e:
+            except (DuplicateKeyError, ValueError) as e:
                 # If a duplicate key error occurs, render error page with message
                 # Fehlerseite mit vollständigem Context rendern
                 return render(request, "global/error.html", {
@@ -62,7 +63,6 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
                 })
 
         print("redirecting to success")
-        # return redirect(f'/{base_url}/success', model_name=data_provider.get_model_title())
         return redirect(f'/{base_url}/success', {
             "model_name": data_provider.get_nav_provider().get_model_title(),
             "selected_parent": selected_parent,
@@ -98,8 +98,6 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
 def generic_delete_view(request, data_provider: DataProviderBase):
     base_url = data_provider.get_nav_provider().get_base_url()
     return_url = f"/{base_url}/list"
-    #if base_url == 'sales/objekte':
-    #    return_url = reverse('sales_objekt_sortable')
 
     if 'key' not in request.POST:
         #return HttpResponseBadRequest("Invalid request. key to delete not found!", content_type="text/plain")
@@ -128,8 +126,6 @@ def generic_delete_view(request, data_provider: DataProviderBase):
 def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_map, template_name):
     max_page_index = 6
     return_url = f"/{base_url}/list"
-    #if base_url == 'sales/objekte':
-    #    return_url = reverse('sales_objekt_sortable')
     page_index = 1
     item_count = 15
     sort_col = ''
@@ -218,9 +214,6 @@ def generic_static_view(request, static_html, menu_map, arguments):
 def success_view(request, model_name, base_url, menu_map):
     selected_parent = get_selected_parent(menu_map, request)
     return_url = f"/{base_url}/list"
-    #if base_url == 'sales/objekte':
-    #    return_url = reverse('sales_objekt_sortable')
-
     try:
         return render(request, 'global/success.html', {
             'menu_map': menu_map,

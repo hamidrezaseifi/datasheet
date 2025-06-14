@@ -134,7 +134,7 @@ STATICFILES_DIRS = [STATIC_DIR]
 # print("STATIC_DIR: ", STATIC_DIR)
 
 STATIC_URL = 'static/'
-STATIC_ROOT = 'http://127.0.0.1:8000/django/'
+#STATIC_ROOT = 'http://127.0.0.1:8000/django/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # print("STATIC_ROOT: ", STATIC_ROOT)

@@ -16,7 +16,7 @@ Base = declarative_base()
 
 class ZvmObjekte(Base):
     __tablename__ = 'zvm_objekte'
-    __table_args__ = {'schema': 'stage', 'quote': False, 'extend_existing': True}
+    __table_args__ = {'schema': 'ZVM_STAGING.stage', 'quote': False, 'extend_existing': True}
     Kuerzel = Column(String(255), nullable=False, primary_key=True, name='Kuerzel', quote=False)
     rep_Kuerzel = Column(String(255), nullable=False, name='rep_Kuerzel', quote=False)
     Vertriebsweg = Column(String(255), nullable=False, name='Vertriebsweg', quote=False)
@@ -65,7 +65,7 @@ ZVM_OBJEKT_DATA_PROVIDER = ZvmObjektProvider()
 
 class SalesObjekt(Base):
     __tablename__ = 'sales_objekt'
-    __table_args__ = {'schema': 'djange'}
+    __table_args__ = {'schema': 'test_evar.djange'}
     objekt = Column(String(100), nullable=False, primary_key=True, unique=False)
     sort_order = Column(Integer, nullable=True)
     user_name = Column(String(255), nullable=True)
@@ -82,7 +82,7 @@ class SalesObjektProvider(DataProviderBase, ABC):
     def __init__(self):
         print("Initializing SalesObjektProvider")
         super().__init__(DatabaseConfig('SalesObjekt'),
-                         'djange',
+                         'test_evar.djange',
                          'sales_objekt',
                          ['objekt'],
                          ModelNavigationProvider("Objekte",
@@ -130,9 +130,9 @@ SALES_OBJEKT_DATA_PROVIDER = SalesObjektProvider()
 
 class SalesPrognose(Base):
     __tablename__ = 'sales_prognose'
-    __table_args__ = {'schema': 'djange'}
+    __table_args__ = {'schema': 'test_evar.djange'}
 
-    objekt = Column(BigInteger, ForeignKey('djange.sales_objekt.objekt'), primary_key=True, nullable=False)
+    objekt = Column(BigInteger, ForeignKey('test_evar.djange.sales_objekt.objekt'), primary_key=True, nullable=False)
     jahr = Column(Integer, primary_key=True, nullable=False)
     monat = Column(Integer, primary_key=True, nullable=False)
     datum = Column(Date, nullable=True)
@@ -151,7 +151,7 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
 
     def __init__(self):
         super().__init__(DatabaseConfig('SalesPrognose'),
-                         'djange',
+                         'test_evar.djange',
                          'sales_prognose',
                          ['objekt', 'jahr', 'monat'],
                          ModelNavigationProvider("Prognose", "sales/prognose", "Sales", self))

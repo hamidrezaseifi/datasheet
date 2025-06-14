@@ -1,25 +1,15 @@
-{% extends 'global/base.html' %}
+{% extends 'global/base_no_sidebar.html' %}
 
-{% block title %}{{ model_name }} Liste{% endblock %}
+{% block title %}Projekte{% endblock %}
 
 {% block content %}
-
-    <h1 style="margin-bottom: 20px">heise Data-Sheet Home ...</h1>
-
-   <div class="d-flex">
-        <!-- Seitenleiste -->
-        <div class="col-md-1">
-
-            <ul class="nav flex-column">
-                {% for title, url in data_providers.items %}
-                <li class="nav-item">
-                    <a class="nav-link {% if request.path == url %}active{% endif %}" style="color: black" href="{{url}}/list">{{title}}</a>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-
+    <h2>Bitte ein Projekt auswählen:</h2>
+    <div class="list-group">
+        {% for parent, projects in menu_map.items %}
+            <h4 style="margin-top: 20px;">{{ parent }}</h4>
+            {% for name, url in projects.items %}
+                <a href="{{ url }}/list" class="list-group-item list-group-item-action">{{ name }}</a>
+            {% endfor %}
+        {% endfor %}
     </div>
-
-
 {% endblock %}
