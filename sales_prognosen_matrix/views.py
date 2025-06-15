@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 
+from meinprojekt.navigation import NAVIGATION_DATA
 from shared_fields.menu_provider import PROJECT_MENUS
 from sales_prognosen_matrix.models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
 from shared_fields.data_provider import DataProviderBase
@@ -28,6 +29,7 @@ def sortable_objekt_list_view(request, data_provider: DataProviderBase, base_url
         'model_name': model_name,
         'base_url': base_url,
         'menu_map': PROJECT_MENUS,
+        'navigations': NAVIGATION_DATA,
         'selected_parent': get_selected_parent(PROJECT_MENUS, request),
         'object_sort_map': object_sort_map,
         'return_url': return_url,
