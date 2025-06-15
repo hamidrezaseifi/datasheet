@@ -1,5 +1,7 @@
 from django.http import Http404
 from django.shortcuts import render, redirect
+
+from meinprojekt.navigation import NAVIGATION_DATA
 from shared_fields.menu_provider import get_all_project_groups, get_menu_for_project_group, PROJECT_MENUS
 
 
@@ -11,7 +13,8 @@ def project_selector_view(request):
     ]
     return render(request, "global/project_selector.html", {
         "groups": groups,
-        "menu_map": PROJECT_MENUS  # Für den Sidebar in anderen Seiten
+        "menu_map": PROJECT_MENUS,
+        'navigations': NAVIGATION_DATA,
     })
 
 

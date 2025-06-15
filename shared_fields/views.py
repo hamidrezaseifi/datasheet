@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
+from meinprojekt.navigation import NAVIGATION_DATA
 from shared_fields.data_provider import DataProviderBase, DuplicateKeyError
 
 
@@ -16,7 +17,7 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
     return_url = f"/{base_url}/list"  # Default to list view
     #if base_url == 'sales/objekte':
     #    return_url = reverse('sales_objekt_sortable')
-    print(f"menu_map: {menu_map}")
+
     instance = None
     django_instance = None
     primary_key = None
@@ -178,7 +179,8 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
             "sort_type": sort_type,
             "search_col": search_col,
             "search_value": search_value,
-            "return_url": return_url
+            "return_url": return_url,
+            'navigations': NAVIGATION_DATA
         })
     except Exception as e:
         return render(request, 'global/error.html', {
@@ -186,7 +188,8 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
             'base_url': base_url,
             'menu_map': menu_map,
             'selected_parent': selected_parent,
-            'return_url': return_url
+            'return_url': return_url,
+            'navigations': NAVIGATION_DATA
         })
 
 

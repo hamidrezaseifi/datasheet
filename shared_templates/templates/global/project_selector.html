@@ -1,27 +1,26 @@
-{% extends 'global/base_no_sidebar.html' %}
+{% extends 'global/base.html' %}
 
 {% block title %}Projektgruppen{% endblock %}
 
 {% block styles %}
     .start-page-card{
-        margin: 2px auto;
+        margin: 20px 20px;
         padding: 0;
         .card-body{
             padding: 0;
         }
     }
-    .start-page-card-title{
-        text-decoration: none;
-        .card-title {
-            padding: 4px 10px ;
-            background-color: blue;
-            color: #fdfdcb;
-        }
-        .card-title:hover {
-            color: #fed9d7;
-        }
 
+    .card-title {
+        padding: 4px 10px ;
+        background-color: #14315B;
+        color: #fdfdcb;
     }
+    .card-title:hover {
+        color: #fed9d7;
+    }
+
+
     .cards-link-container{
         padding: 5px 10px;
     }
@@ -29,16 +28,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h2 class="mb-4">Projektgruppe auswählen</h2>
-        <div class="row">
-            {% for group in groups %}
-                <div class="col-md-6 mb-3">
-                    <a href="{% url 'project_menu' group.group_name %}" class="btn btn-primary btn-lg w-100">{{ group.group_name }}</a>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
+
     <div class="container mt-5">
         <h2 class="mb-4">Projektgruppe auswählen</h2>
         <div class="row">
@@ -54,6 +44,7 @@
                   </div>
                 </div>
             {% endfor %}
+
         </div>
     </div>
 {% endblock %}
