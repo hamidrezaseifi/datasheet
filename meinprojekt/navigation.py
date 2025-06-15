@@ -1,18 +1,16 @@
-NAVIGATION_DATA = [
-    {"id": 1, "parent": 0, "name": "Start-Seite", "url": "/", "children": []},
-    {"id": 2, "parent": 0, "name": "Meine Test", "url": "#", "children": [
-        {"id": 3, "parent": 2, "name": "Eingabe", "url": "/eingabe", "children": []},
-        {"id": 4, "parent": 2, "name": "Planung", "url": "/planung", "children": []},
-    ]},
-    {"id": 5, "parent": 0, "name": "Sales", "url": "#", "children": [
-        {"id": 6, "parent": 5, "name": "Formular", "url": "#", "children": [
-            {"id": 7, "parent": 6, "name": "Objekte", "url": "/sales/objekte", "children": []},
-            {"id": 8, "parent": 6, "name": "Prognose", "url": "/sales/prognose", "children": []},
-        ]},
-        {"id": 9, "parent": 5, "name": "Report", "url": "#", "children": [
-            {"id": 10, "parent": 9, "name": "Report 1", "url": "#", "children": []},
-            {"id": 11, "parent": 9, "name": "Report 2", "url": "#", "children": []},
-        ]},
+from meinprojekt.models_sqlalchemy import NAVIGATION_DATA_PROVIDER
 
-    ]},
-]
+all_nv_items = NAVIGATION_DATA_PROVIDER.get_all_items()
+
+root_items = [i for i in all_nv_items if i["parent"] == 0]
+
+
+def process_nav(item, all_items):
+    children = [process_nav(i, all_items) for i in all_items if i["parent"] == item["id"]]
+    return {"id": item["id"], "parent": item["parent"], "name": item["nav_name"], "url": item["url"],
+            "children": children}
+
+
+NAVIGATION_DATA = []
+for i in root_items:
+    NAVIGATION_DATA.append(process_nav(i, all_nv_items))

@@ -1,0 +1,22 @@
+
+CREATE TABLE djange.navigation (
+	id int4 NOT NULL,
+	parent int4 NOT NULL,
+	nav_name varchar(255) NOT NULL,
+	url varchar(255) DEFAULT '#'::character varying NOT NULL,
+	CONSTRAINT navigation_pk PRIMARY KEY (id)
+);
+
+INSERT INTO djange.navigation (id,parent,nav_name,url) VALUES
+	 (1,0,'Start-Seite','/'),
+	 (2,0,'Meine Test','#'),
+	 (3,2,'Eingabe','/eingabe'),
+	 (4,2,'Planung','/planung'),
+	 (5,0,'Sales','#'),
+	 (6,5,'Formular','#'),
+	 (7,6,'Objekte','/sales/objekte'),
+	 (8,6,'Prognose','/sales/prognose'),
+	 (9,5,'Report','#'),
+	 (10,9,'Report 1','#');
+INSERT INTO djange.navigation (id,parent,nav_name,url) VALUES
+	 (11,9,'Report 2','#');
