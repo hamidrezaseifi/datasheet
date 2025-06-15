@@ -37,9 +37,9 @@ urlpatterns = [
     #path('projects/', project_selector_view, name='project_selector'),
     path('projects/<str:group_name>/', project_menu_view, name='project_menu'),
 
-    #path('', project_selector_view, name='home_view'),
-    path('', generic_static_view, {'static_html': 'global/home.html', 'menu_map': PROJECT_MENUS, 'arguments': {}},
-         name='home_view'),
+    path('', project_selector_view, name='home_view'),
+    #path('', generic_static_view, {'static_html': 'global/home.html', 'menu_map': PROJECT_MENUS, 'arguments': {}},
+    #     name='home_view'),
     path('planung/', include('planung.urls')),
     path('eingabe/', include('eingabemaske.urls')),
     path('sales/prognose/', include('sales_prognosen_matrix.prognose_urls')),

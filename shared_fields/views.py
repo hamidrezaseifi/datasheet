@@ -1,6 +1,5 @@
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse
 
 from shared_fields.data_provider import DataProviderBase, DuplicateKeyError
 
@@ -17,7 +16,7 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
     return_url = f"/{base_url}/list"  # Default to list view
     #if base_url == 'sales/objekte':
     #    return_url = reverse('sales_objekt_sortable')
-
+    print(f"menu_map: {menu_map}")
     instance = None
     django_instance = None
     primary_key = None

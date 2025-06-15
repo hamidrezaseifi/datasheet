@@ -2,6 +2,32 @@
 
 {% block title %}Projektgruppen{% endblock %}
 
+{% block styles %}
+    .start-page-card{
+        margin: 2px auto;
+        padding: 0;
+        .card-body{
+            padding: 0;
+        }
+    }
+    .start-page-card-title{
+        text-decoration: none;
+        .card-title {
+            padding: 4px 10px ;
+            background-color: blue;
+            color: #fdfdcb;
+        }
+        .card-title:hover {
+            color: #fed9d7;
+        }
+
+    }
+    .cards-link-container{
+        padding: 5px 10px;
+    }
+
+{% endblock %}
+
 {% block content %}
     <div class="container mt-5">
         <h2 class="mb-4">Projektgruppe auswählen</h2>
@@ -9,6 +35,23 @@
             {% for group in groups %}
                 <div class="col-md-6 mb-3">
                     <a href="{% url 'project_menu' group.group_name %}" class="btn btn-primary btn-lg w-100">{{ group.group_name }}</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="container mt-5">
+        <h2 class="mb-4">Projektgruppe auswählen</h2>
+        <div class="row">
+            {% for parent, projects in menu_map.items %}
+                <div class="card start-page-card" style="width: 18rem;">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ parent }}</h5>
+                    <div class="cards-link-container">
+                        {% for project_name, url in projects.items %}
+                        <a href="{{ url }}" class="card-link">{{ project_name }}</a>
+                        {% endfor %}
+                    </div>
+                  </div>
                 </div>
             {% endfor %}
         </div>
