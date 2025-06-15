@@ -32,18 +32,55 @@
     <div class="container mt-5">
         <h2 class="mb-4">Projektgruppe auswählen</h2>
         <div class="row">
-            {% for parent, projects in menu_map.items %}
-                <div class="card start-page-card" style="width: 18rem;">
-                  <div class="card-body">
-                    <h5 class="card-title">{{ parent }}</h5>
-                    <div class="cards-link-container">
-                        {% for project_name, url in projects.items %}
-                        <a href="{{ url }}" class="card-link">{{ project_name }}</a>
-                        {% endfor %}
+        {% for navigation in navigations %}
+            {% if navigation.start_page %}
+            <div class="card start-page-card" style="width: 18rem;">
+              <div class="card-body">
+                <h5 class="card-title">{{ navigation.name }}</h5>
+                <div class="cards-link-container">
+                    {% if navigation.last_parent %}
+                    <div class="accordion" id="accordion{{ navigation.id }}">
+                {% for sub_navigation in navigation.children %}
+                    {% if sub_navigation.start_page %}
+
+                      <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{sub_navigation.id}}">
+                          <button class="accordion-button collapsed" style="padding: 10px; background-color: #f3f3f3;" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{sub_navigation.id}}" aria-expanded="false" aria-controls="collapse{{sub_navigation.id}}">
+                              {{ sub_navigation.name }}
+                          </button>
+                        </h2>
+                        <div id="collapse{{sub_navigation.id}}" class="accordion-collapse collapse" aria-labelledby="heading{{sub_navigation.id}}" data-bs-parent="#accordion{{ navigation.id }}">
+                          <div class="accordion-body" style="padding: 0;">
+                              <div class="list-group">
+                            {% for sub_navigation_2 in sub_navigation.children %}
+                                {% if sub_navigation_2.start_page %}
+                                <a href="{{sub_navigation_2.url}}" class="list-group-item list-group-item-action">{{sub_navigation_2.name}}</a>
+                                {% endif %}
+                            {% endfor %}
+                              </div>
+                          </div>
+                        </div>
+                      </div>
+
+
+                    {% endif %}
+                {% endfor %}
                     </div>
-                  </div>
+                    {% else %}
+                      <div class="list-group">
+                    {% for sub_navigation in navigation.children %}
+                        {% if sub_navigation.start_page %}
+                        <a href="{{sub_navigation.url}}" class="list-group-item list-group-item-action">{{sub_navigation.name}}</a>
+                        {% endif %}
+                    {% endfor %}
+                      </div>
+
+                    {% endif %}
                 </div>
-            {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+        {% endfor %}
 
         </div>
     </div>

@@ -16,6 +16,7 @@ class Navigation(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     parent = Column(Integer, primary_key=True, nullable=False)
     nav_name = Column(String(255), nullable=False)
+    start_page = Column(Integer, primary_key=True, nullable=False)
     url = Column(String(255), nullable=False)
 
 
@@ -23,14 +24,14 @@ class NavigationDataProvider(DataProviderBase):
 
     def __init__(self):
         super().__init__(DatabaseConfig('navigation'),
-                         'test_evar.djange',
+                         'djange',
                          'navigation',
                          ['id'],
                          None)
         metadata = MetaData()
 
         self._table = None
-        self._columns = ["id", "parent", "nav_name", "url"]
+        self._columns = ["id", "parent", "nav_name", "url", "start_page"]
 
     def get_data_model(self):
         return Navigation
