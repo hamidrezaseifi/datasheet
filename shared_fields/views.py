@@ -5,13 +5,9 @@ from meinprojekt.navigation import NAVIGATION_DATA
 from shared_fields.data_provider import DataProviderBase, DuplicateKeyError
 
 
-def generic_crud_view(request, data_provider: DataProviderBase, form_class, base_url, menu_map,
+def generic_crud_view(request, data_provider: DataProviderBase, form_class, base_url,
                       template_name: str,
                       primary_key_base64=None):
-    """
-    Generische View für CRUD-Operationen mit DataProviderBase.
-    """
-    selected_parent = get_selected_parent(menu_map, request)
 
     # Set return_url dynamically
     return_url = f"/{base_url}/list"  # Default to list view
@@ -57,15 +53,12 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
                 return render(request, "global/error.html", {
                     "message": str(e),
                     "base_url": base_url,
-                    "menu_map": menu_map,
-                    "selected_parent": selected_parent,
                     "return_url": return_url
                 })
 
         print("redirecting to success")
         return redirect(f'/{base_url}/success', {
             "model_name": data_provider.get_nav_provider().get_model_title(),
-            "selected_parent": selected_parent,
             "return_url": return_url
         })
 
@@ -84,12 +77,10 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
 
     return render(request, template_name,
                   {
-                      'menu_map': menu_map,
                       'base_url': base_url,
                       'form': form,
                       'instance': instance,
                       'model_name': data_provider.get_nav_provider().get_model_title(),
-                      "selected_parent": selected_parent,
                       "extrac_data": data_provider.get_edit_extra_data(),
                       "return_url": return_url
                   })
@@ -123,7 +114,7 @@ def generic_delete_view(request, data_provider: DataProviderBase):
         }, status=400)
 
 
-def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_map, template_name):
+def generic_list_view(request, data_provider: DataProviderBase, base_url, template_name):
     max_page_index = 6
     return_url = f"/{base_url}/list"
     page_index = 1
@@ -160,10 +151,8 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
             page_index = page_count
         pk_columns = data_provider.get_primary_key()
         page_index_list = _generate_page_index_list(max_page_index, page_count, page_index)
-        selected_parent = get_selected_parent(menu_map, request)
 
         return render(request, template_name, {
-            'menu_map': menu_map,
             'total': total,
             'page_count': page_count,
             'page_list': page_index_list,
@@ -174,7 +163,6 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
             'model_name': data_provider.get_nav_provider().get_model_title(),
             'base_url': base_url,
             'pk_columns': pk_columns,
-            "selected_parent": selected_parent,
             "sort_col": sort_col,
             "sort_type": sort_type,
             "search_col": search_col,
@@ -186,63 +174,40 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, menu_m
         return render(request, 'global/error.html', {
             'message': str(e),
             'base_url': base_url,
-            'menu_map': menu_map,
-            'selected_parent': selected_parent,
             'return_url': return_url,
             'navigations': NAVIGATION_DATA
         })
 
 
-def generic_static_view(request, static_html, menu_map, arguments):
-    selected_parent = get_selected_parent(menu_map, request)
+def generic_static_view(request, static_html, arguments):
     return_url = '/'  # Default to home
 
     try:
         return render(request, static_html, {
-            'menu_map': menu_map,
             'data': arguments,
-            "selected_parent": selected_parent,
             "return_url": return_url
         })
     except Exception as e:
         return render(request, 'global/error.html', {
             'message': str(e),
-            'menu_map': menu_map,
-            'selected_parent': selected_parent,
             'return_url': return_url
         })
 
 
-def success_view(request, model_name, base_url, menu_map):
-    selected_parent = get_selected_parent(menu_map, request)
+def success_view(request, model_name, base_url):
     return_url = f"/{base_url}/list"
     try:
         return render(request, 'global/success.html', {
-            'menu_map': menu_map,
             'base_url': base_url,
             'model_name': model_name,
-            "selected_parent": selected_parent,
             "return_url": return_url
         })
     except Exception as e:
         return render(request, 'global/error.html', {
             'message': str(e),
             'base_url': base_url,
-            'menu_map': menu_map,
-            'selected_parent': selected_parent,
             'return_url': return_url
         })
-
-
-def get_selected_parent(menu_map, request):
-    selected_parent = None
-    for par in menu_map:
-        for proj in menu_map[par]:
-            print(f"Search {menu_map[par][proj]} in {request.path}")
-            if menu_map[par][proj] in request.path:
-                selected_parent = par
-                break
-    return selected_parent
 
 
 def _generate_page_index_list(max_page_index, page_count, page_index):

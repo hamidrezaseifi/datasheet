@@ -1,4 +1,3 @@
-from shared_fields.menu_provider import PROJECT_MENUS
 from sales_prognosen_matrix.forms import SalesPrognoseForm
 from sales_prognosen_matrix.models_sqlalchemy import SALES_PROGNOSE_DATA_PROVIDER
 from shared_fields.views import generic_crud_view, generic_list_view, generic_delete_view, success_view
@@ -9,6 +8,5 @@ urlpatterns = SALES_PROGNOSE_DATA_PROVIDER.get_nav_provider().get_urls(SalesProg
                                                                        generic_crud_view,
                                                                        generic_list_view,
                                                                        generic_delete_view,
-                                                                       success_view,
-                                                                       PROJECT_MENUS)
+                                                                       success_view)
 

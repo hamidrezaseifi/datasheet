@@ -1,13 +1,12 @@
-
-                    {% if navigation.children|length %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-item dropdown-toggle" href="{{ navigation.url }}" role="button" {% if level == 1 %} data-bs-toggle="dropdown" {% endif %} aria-expanded="false">{{ navigation.name }}</a>
-                        <ul class="dropdown-menu">
-                            {%for ch in navigation.children %}
-                                {% include "global/nav_item.html" with navigation=ch level=level|add:1 %}
-                            {%endfor%}
-                        </ul>
-                    </li>
-                    {% else %}
-                    <li class="nav-item"><a class="nav-link" href="{{ navigation.url }}">{{ navigation.name }}</a></li>
-                    {% endif %}
+                {% if navigation.children|length %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-item dropdown-toggle" href="{{ navigation.url }}" role="button" {% if level == 1 %} data-bs-toggle="dropdown" {% endif %} aria-expanded="false">{{ navigation.name }}</a>
+                    <ul class="dropdown-menu">
+                        {%for ch in navigation.children %}
+                            {% include "global/nav_item.html" with navigation=ch level=level|add:1 %}
+                        {%endfor%}
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item"><a class="nav-link" href="{{ navigation.url }}">{{ navigation.name }}</a></li>
+                {% endif %}

@@ -21,54 +21,34 @@ class ModelNavigationProvider:
         self._crud_template_name = crud_template_name
         self._list_template_name = list_template_name
 
-    # def get_urls(self, form_data, view_create_func, view_list_func, view_delete_func, view_success_func,
-    #              menu_map) -> List:
-    #
-    #     return [
-    #         path('', view_list_func,
-    #              {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url}),
-    #         path('list/', view_list_func,
-    #              {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url}),
-    #         path('data/', view_create_func,
-    #              {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
-    #               'form_class': form_data, 'template_name': self._crud_template_name }),
-    #         path('delete', view_delete_func, {'data_provider': self._data_provider}),
-    #         path('data/<str:primary_key_base64>/', view_create_func,
-    #              {'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
-    #               'form_class': form_data, 'template_name': self._crud_template_name }),
-    #         path('success', view_success_func,
-    #              {'model_name': self._model_title, 'menu_map': menu_map,
-    #               'base_url': self._base_url}),
-    #     ]
     def get_urls(
             self,
             form_data,
             view_create_func,
             view_list_func,
             view_delete_func,
-            view_success_func,
-            menu_map
+            view_success_func
     ) -> List:
         crud_urls = [
             path('', view_list_func, {
-                'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+                'data_provider': self._data_provider, 'base_url': self._base_url,
                 'template_name': self._list_template_name
             }),
             path('list/', view_list_func, {
-                'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+                'data_provider': self._data_provider, 'base_url': self._base_url,
                 'template_name': self._list_template_name
             }),
             path('data/', view_create_func, {
-                'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+                'data_provider': self._data_provider, 'base_url': self._base_url,
                 'form_class': form_data, 'template_name': self._crud_template_name
             }),
             path('delete', view_delete_func, {'data_provider': self._data_provider}),
             path('data/<str:primary_key_base64>/', view_create_func, {
-                'data_provider': self._data_provider, 'menu_map': menu_map, 'base_url': self._base_url,
+                'data_provider': self._data_provider, 'base_url': self._base_url,
                 'form_class': form_data, 'template_name': self._crud_template_name
             }),
             path('success', view_success_func, {
-                'model_name': self._model_title, 'menu_map': menu_map, 'base_url': self._base_url
+                'model_name': self._model_title, 'base_url': self._base_url
             }),
         ]
 

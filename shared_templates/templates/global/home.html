@@ -1,15 +1,10 @@
-{% extends 'global/base_no_sidebar.html' %}
+{% extends 'global/base.html' %}
 
 {% block title %}Projekte{% endblock %}
 
 {% block content %}
     <h2>Bitte ein Projekt auswählen:</h2>
     <div class="list-group">
-        {% for parent, projects in menu_map.items %}
-            <h4 style="margin-top: 20px;">{{ parent }}</h4>
-            {% for name, url in projects.items %}
-                <a href="{{ url }}/list" class="list-group-item list-group-item-action">{{ name }}</a>
-            {% endfor %}
-        {% endfor %}
+
     </div>
 {% endblock %}
