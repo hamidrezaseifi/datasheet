@@ -111,51 +111,14 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand row" href="/">
+        <span class="navbar-brand row">
             <div class="col"><img style="width: 30px; height: 30px; margin: 0 0;" src="{% static 'images/heise.png' %}"></div>
             <div class="project-title col" style="font-weight: bold; padding-left: 0; padding-right: 0; text-align: left;">Heise Datasheet</div>
-        </a>
+        </span>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              {% for navigation in navigations %}
-              {%include "global/nav_item.html" with level=1 %}
-
-              {% endfor %}
-
-
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Test Multi Level
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="#">Action</a></li>
-                    <li><a class="nav-link" href="#">Another action</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-item dropdown-toggle" href="#" role="button" aria-expanded="false">Submenu</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="nav-link" href="#">Submenu action</a></li>
-                            <li><a class="nav-link" href="#">Another submenu action</a></li>
-
-
-                            <li class="nav-item dropdown"><a class="nav-link dropdown-item dropdown-toggle" href="#">Subsubmenu</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="nav-link" href="#">Subsubmenu action aa</a></li>
-                                    <li><a class="nav-link" href="#">Another subsubmenu action</a></li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropdown"><a class="dropdown-item dropdown-toggle" href="#">Second subsubmenu</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="nav-link" href="#">Subsubmenu action bb</a></li>
-                                    <li><a class="nav-link" href="#">Another subsubmenu action</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-
-                </ul>
-            </li>
-
+              <li class="nav-item"><a class="nav-link" href="/{{project_home}}">Start-Seite</a></li>
 
           </ul>
         </div>

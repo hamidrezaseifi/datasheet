@@ -1,0 +1,30 @@
+{% extends 'global/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Sales Objejs Start-Seite ..." %}{% endblock %}
+
+{% block content %}
+
+<h5>Sales Objeks Start-Seite ...</h5>
+<br>
+<div>
+    <ul>
+        <li>
+            <div>Formular:</div>
+            <ul>
+                <li><a href="/sales/objekte/list/">Objekts-Liste</a></li>
+                <li><a href="/sales/prognose/list/">Prognose-Liste</a></li>
+            </ul>
+
+        </li>
+
+        <li>
+            <div>Berichte:</div>
+            <ul>
+                <li><a href="#">Report 1</a></li>
+                <li><a href="#">Report 2</a></li>
+            </ul>
+        </li>
+    </ul>
+</div>
+{% endblock %}

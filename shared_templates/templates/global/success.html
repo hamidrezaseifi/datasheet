@@ -8,7 +8,7 @@
     <h1>{{ model_name }} {% trans "erfolgreich gespeichert" %}</h1>
     <p>{% trans "Die Daten wurden erfolgreich in die Datenbank eingefügt." %}</p>
 </div>
-<a href="/" class="btn btn-secondary">{% trans "Zur Startseite" %}</a>
+<a href="/{{project_home}}" class="btn btn-secondary">{% trans "Zur Startseite" %}</a>
 <a href="/{{ base_url }}/data" class="btn btn-secondary">{% trans "Neue" %} {{ model_name }}</a>
 <a href="{{ return_url|default:'/' }}" class="btn btn-secondary">{% trans "Zur" %} {{ model_name }}-{% trans "Liste" %}</a>
 {% endblock %}

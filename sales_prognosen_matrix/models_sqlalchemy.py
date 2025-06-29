@@ -29,7 +29,7 @@ class ZvmObjektProvider(DataProviderBase, ABC):
                          'ZVM_STAGING.stage',
                          'zvm_objekte',
                          ['Kuerzel'],
-                         ModelNavigationProvider('', '', '', None)
+                         ModelNavigationProvider('', '', '', None, home_url='')
                          )
         # Kein create_table!
         metadata = MetaData()
@@ -87,7 +87,9 @@ class SalesObjektProvider(DataProviderBase, ABC):
                          ['objekt'],
                          ModelNavigationProvider("Objekte",
                                                  "sales/objekte",
-                                                 "Sales", self
+                                                 "Sales",
+                                                 self
+                                                 , home_url='sales'
                                                  , list_template_name='sales_prognosen_matrix/sortable_objekt.html'))
         metadata = MetaData()
 
@@ -154,7 +156,7 @@ class SalesPrognoseProvider(DataProviderBase, ABC):
                          'test_evar.djange',
                          'sales_prognose',
                          ['objekt', 'jahr', 'monat'],
-                         ModelNavigationProvider("Prognose", "sales/prognose", "Sales", self))
+                         ModelNavigationProvider("Prognose", "sales/prognose", "Sales", self, home_url='sales'))
         metadata = MetaData()
 
         self._table = Table(self._table_name, metadata,

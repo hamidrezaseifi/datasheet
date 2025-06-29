@@ -1,18 +1,10 @@
-from sales_prognosen_matrix.forms import SalesObjektForm
-from sales_prognosen_matrix.models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
-from sales_prognosen_matrix.views import sortable_objekt_list_view, sortable_objekt_delete_view, \
-    sortable_objekt_add_view, sortable_objekt_save_view
-from shared_fields.views import generic_crud_view, generic_delete_view, success_view
-
-
-from django.urls import path
 from django.urls import path
 
 from sales_prognosen_matrix.forms import SalesObjektForm
 from sales_prognosen_matrix.models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
 from sales_prognosen_matrix.views import sortable_objekt_list_view, sortable_objekt_delete_view, \
     sortable_objekt_add_view, sortable_objekt_save_view
-from shared_fields.views import generic_crud_view, generic_delete_view, success_view
+from shared_fields.views import generic_crud_view, generic_delete_view, success_view, home_view
 
 print("imports successful: prognose.urls")
 
@@ -30,7 +22,8 @@ urlpatterns = (
         generic_crud_view,
         sortable_objekt_list_view,
         generic_delete_view,
-        success_view
+        success_view,
+        home_view
     ) + extract_urls
 
 )

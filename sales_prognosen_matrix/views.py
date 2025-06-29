@@ -1,13 +1,12 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from meinprojekt.navigation import NAVIGATION_DATA
 from sales_prognosen_matrix.models_sqlalchemy import SALES_OBJEKT_DATA_PROVIDER
 from shared_fields.data_provider import DataProviderBase
 from .forms import SalesObjektForm
 
 
-def sortable_objekt_list_view(request, data_provider: DataProviderBase, base_url, template_name):
+def sortable_objekt_list_view(request, data_provider: DataProviderBase, base_url, template_name, home: str):
     model_name = SALES_OBJEKT_DATA_PROVIDER.get_model_title()
     base_url = "/" + SALES_OBJEKT_DATA_PROVIDER.get_nav_provider().get_base_url()
     return_url = "/" + SALES_OBJEKT_DATA_PROVIDER.get_nav_provider().get_base_url()
@@ -26,12 +25,12 @@ def sortable_objekt_list_view(request, data_provider: DataProviderBase, base_url
         'form': form,
         'model_name': model_name,
         'base_url': base_url,
-        'navigations': NAVIGATION_DATA,
         'object_sort_map': object_sort_map,
         'return_url': return_url,
         'delete_url': delete_url,
         'add_url': add_url,
         'save_url': save_url,
+        'project_home': home
     })
 
 

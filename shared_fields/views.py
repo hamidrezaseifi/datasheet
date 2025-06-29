@@ -1,13 +1,13 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
-from meinprojekt.navigation import NAVIGATION_DATA
 from shared_fields.data_provider import DataProviderBase, DuplicateKeyError
 
 
 def generic_crud_view(request, data_provider: DataProviderBase, form_class, base_url,
                       template_name: str,
-                      primary_key_base64=None):
+                      home: str,
+                      primary_key_base64=None,):
 
     # Set return_url dynamically
     return_url = f"/{base_url}/list"  # Default to list view
@@ -59,7 +59,8 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
         print("redirecting to success")
         return redirect(f'/{base_url}/success', {
             "model_name": data_provider.get_nav_provider().get_model_title(),
-            "return_url": return_url
+            "return_url": return_url,
+            'project_home': home
         })
 
     else:
@@ -82,11 +83,12 @@ def generic_crud_view(request, data_provider: DataProviderBase, form_class, base
                       'instance': instance,
                       'model_name': data_provider.get_nav_provider().get_model_title(),
                       "extrac_data": data_provider.get_edit_extra_data(),
-                      "return_url": return_url
+                      "return_url": return_url,
+                      'project_home': home
                   })
 
 
-def generic_delete_view(request, data_provider: DataProviderBase):
+def generic_delete_view(request, data_provider: DataProviderBase, home: str):
     base_url = data_provider.get_nav_provider().get_base_url()
     return_url = f"/{base_url}/list"
 
@@ -104,17 +106,19 @@ def generic_delete_view(request, data_provider: DataProviderBase):
         data_provider.delete(primary_key, None)
         return JsonResponse({
             'status': 'success',
-            'key-to-delete': primary_key
+            'key-to-delete': primary_key,
+            'project_home': home
         })
     except Exception as e:
         return JsonResponse({
             'status': 'error',
             'message': str(e),
-            'return_url': return_url
+            'return_url': return_url,
+            'project_home': home
         }, status=400)
 
 
-def generic_list_view(request, data_provider: DataProviderBase, base_url, template_name):
+def generic_list_view(request, data_provider: DataProviderBase, base_url, template_name, home: str):
     max_page_index = 6
     return_url = f"/{base_url}/list"
     page_index = 1
@@ -168,45 +172,49 @@ def generic_list_view(request, data_provider: DataProviderBase, base_url, templa
             "search_col": search_col,
             "search_value": search_value,
             "return_url": return_url,
-            'navigations': NAVIGATION_DATA
+            'project_home': home
         })
     except Exception as e:
         return render(request, 'global/error.html', {
             'message': str(e),
             'base_url': base_url,
             'return_url': return_url,
-            'navigations': NAVIGATION_DATA
+            'project_home': home
         })
 
 
-def generic_static_view(request, static_html, arguments):
+def generic_static_view(request, static_html, arguments, home: str):
     return_url = '/'  # Default to home
 
     try:
         return render(request, static_html, {
             'data': arguments,
-            "return_url": return_url
+            "return_url": return_url,
+            'project_home': home
         })
     except Exception as e:
         return render(request, 'global/error.html', {
             'message': str(e),
-            'return_url': return_url
+            'return_url': return_url,
+            'project_home': home
         })
 
 
-def success_view(request, model_name, base_url):
+def success_view(request, model_name, base_url, home: str):
     return_url = f"/{base_url}/list"
     try:
         return render(request, 'global/success.html', {
             'base_url': base_url,
             'model_name': model_name,
-            "return_url": return_url
+            "return_url": return_url,
+            'project_home': home
         })
     except Exception as e:
         return render(request, 'global/error.html', {
             'message': str(e),
             'base_url': base_url,
-            'return_url': return_url
+            'return_url': return_url,
+            'project_home': home
         })
 
 
@@ -220,3 +228,10 @@ def _generate_page_index_list(max_page_index, page_count, page_index):
         end = page_count + 1
     page_index_list = range(start, end)
     return page_index_list
+
+
+def home_view(request, template_name: str, home: str):
+    if template_name is None:
+        template_name = 'global/general_home.html'
+    return render(request, template_name, {'project_home': home})
+

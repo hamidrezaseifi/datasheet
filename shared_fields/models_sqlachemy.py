@@ -14,7 +14,7 @@ class ActionLogProvider(DataProviderBase, ABC):
     def __init__(self):
         print("Initializing ActionLogProvider")
         super().__init__(DatabaseConfig('dbo'),
-                         'test_evar.djange',
+                         'djange',
                          'action_log',
                          ['user'],
                          ModelNavigationProvider('', '', '', None)
